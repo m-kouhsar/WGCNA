@@ -9,9 +9,9 @@
 #SBATCH --mail-type=END # send email at job completion
 #SBATCH --mail-user=m.kouhsar@exeter.ac.uk # email address
 
-net_file="/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/PITT/PITT.Regressed.MAD.0.5.WGCNA.Net.rds"
-expr_file="/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/PITT/PITT.Regressed.MAD.0.5.rds"
-pheno_file="/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Raw/Pitts.Pheno.NoControl.0.2.csv"
+net_file="./betas.Regressed.MAD.0.5.WGCNA.Net.rds"
+expr_file="./betas.Regressed.MAD.0.5.rds"
+pheno_file="./betas.csv"
 trait=Psychosis
 covars_fact=Sex,BraakStage,Plate
 covars_num=Age,CellProportion
@@ -22,7 +22,7 @@ SoftPow=3
 corr_plot=no
 scatter_plot=no
 save_csv=yes
-out_pref="/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/PITT/PITT.Regressed.MAD.0.5.WGCNA"
+out_pref="./betas.Regressed.MAD.0.5.WGCNA"
 
 
 ScriptDir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/Scripts

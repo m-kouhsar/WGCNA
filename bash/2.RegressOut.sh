@@ -9,13 +9,13 @@
 #SBATCH --mail-type=END # send email at job completion
 #SBATCH --mail-user=m.kouhsar@exeter.ac.uk # email address
 
-input_expression=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Raw/Pitts.NoControl.Quantile.0.2.prepared.rds
-input_phenotype=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Raw/Pitts.Pheno.NoControl.0.2.csv
+input_expression=./betas.rds
+input_phenotype=./betas.csv
 trait=Psychosis
-variables_fact=Sex,BraakStage,Plate,TissueType
-variables_num=Age,CellProportion
-model_lm=~Age+CellProportion+Sex+Plate+BraakStage+TissueType
-out_pref=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/PITT
+variables_fact=Sex
+variables_num=Age
+model_lm=~Age+Sex
+out_pref=./data
 
 
 ScriptDir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/Scripts

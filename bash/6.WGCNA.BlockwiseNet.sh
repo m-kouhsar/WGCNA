@@ -10,13 +10,13 @@
 #SBATCH --mail-user=m.kouhsar@exeter.ac.uk # email address
 
 
-Data_File=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/BDR/BDR.Regressed.MAD.0.5.rds
+Data_File=./betas.Regressed.MAD.0.5.rds
 SoftPow=6
 Block_Size=30000
 min_Module_Size=100
 Save_TOM=No
 Plot_Dendro=No
-OutPrefix=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/BDR/BDR.Regressed.MAD.0.5
+OutPrefix=./betas.Regressed.MAD.0.5
 
 ScriptDir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/Scripts
 

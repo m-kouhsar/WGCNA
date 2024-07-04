@@ -10,9 +10,9 @@
 #SBATCH --mail-user=m.kouhsar@exeter.ac.uk # email address
 
 
-data_file=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/PITT/PITT.Regressed.MAD.0.5.rds
+data_file=./betas.Regressed.MAD.0.5.rds
 block_size=30000
-out_pref="PITT.Regressed.MAD.0.5"
+out_pref=./betas.Regressed.MAD.0.5
 
 
 script_dir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/Scripts

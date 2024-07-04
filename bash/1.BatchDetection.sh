@@ -10,11 +10,11 @@
 #SBATCH --mail-user=m.kouhsar@exeter.ac.uk # email address
 
 
-Data_File=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Raw/Pitts.NoControl.Quantile.0.2.prepared.rds
-Pheno_File=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Raw/Pitts.Pheno.NoControl.0.2.csv
-Covars_Factor=Sex,BraakStage,Plate,SentrixID,TissueType
+Data_File=./betas.rds
+Pheno_File=./pheno.csv
+Covars_Factor=Sex,Plate
 Covars_Num=Age,CellProportion
-Out_Prefix=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/PITT
+Out_Prefix=./betas
 
 ScriptDir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/Scripts
 
