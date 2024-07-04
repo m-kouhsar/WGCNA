@@ -15,7 +15,7 @@ block_size=30000
 out_pref=./betas.Regressed.MAD.0.5
 
 
-script_dir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/Scripts
+script_dir=./R
 
 
 Rscript $script_dir/5.WGCNA.PicSoftThresh.R $data_file $block_size $out_pref

@@ -16,7 +16,7 @@ Covars_Factor=Sex,Plate
 Covars_Num=Age,CellProportion
 Out_Prefix=./betas
 
-ScriptDir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/Scripts
+ScriptDir=./R
 
 Rscript ${ScriptDir}/1.BatchDetection.R $Data_File $Pheno_File $Covars_Factor $Covars_Num $Out_Prefix 
 

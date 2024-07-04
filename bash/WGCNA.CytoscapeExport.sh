@@ -12,15 +12,16 @@
 #SBATCH --error=%x.%j.err
 
 
-net_file=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/mad.0.5.lm.v2.pow3/Pitts.Psycho.0.2.Pow3.wgcna.network.rds
-module_name=darkred
+net_file=./betas.Regressed.MAD.0.5.WGCNA.Net.rds
+module_name=darkgreen
 weighted=T
 threshold=0.03
-out_pref=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/mad.0.5.lm.v2.pow3/Pitts.Psycho.0.2.lmCorrected
+out_pref=./betas
+TOM_Dir=
 
-script_dir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/Scripts
+script_dir=./R
 
 
-Rscript $script_dir/WGCNA.CytoscapeExport.R $net_file $module_name $weighted $threshold $out_pref
+Rscript $script_dir/WGCNA.CytoscapeExport.R $net_file $module_name $weighted $threshold $out_pref $TOM_dir
 
 

@@ -12,7 +12,7 @@
 beta_file=./betas.Regressed.MAD.0.5.rds
 out_pref=./betas.Regressed.MAD.0.5
 
-ScriptDir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/Scripts
+ScriptDir=./R
 
 
 Rscript ${ScriptDir}/4.OutlierDetection.R $beta_file $out_pref

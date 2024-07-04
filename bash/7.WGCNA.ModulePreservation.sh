@@ -20,7 +20,7 @@ max_gold=1000
 n_permut=1000
 out_pref=./betas1.betas2
 
-script_dir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/Scripts
+script_dir=./R
 
 
 Rscript ${script_dir}/WGCNA.ModulePreservation.R  $exp_file_1  $exp_file_2  $net_file_1  $modules  $max_size $max_gold $n_permut $out_pref

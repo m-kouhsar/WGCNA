@@ -18,7 +18,7 @@ model_lm=~Age+Sex
 out_pref=./data
 
 
-ScriptDir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/Scripts
+ScriptDir=./R
 
 
 Rscript ${ScriptDir}/2.RegressOut.R $input_expression $input_phenotype $trait $variables_fact $variables_num $model_lm $out_pref

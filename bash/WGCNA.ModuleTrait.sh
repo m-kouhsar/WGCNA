@@ -24,8 +24,7 @@ scatter_plot=no
 save_csv=yes
 out_pref="./betas.Regressed.MAD.0.5.WGCNA"
 
-
-ScriptDir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/Scripts
+ScriptDir=./R
 
 Rscript ${ScriptDir}/WGCNA.ModuleTrait.R $net_file $expr_file $pheno_file $trait $covars_fact $covars_num $modules \
 									   $analysis_type $calc_ME $SoftPow $corr_plot $scatter_plot $save_csv $out_pref 

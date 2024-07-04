@@ -13,7 +13,7 @@ beta_file=./betas.Regressed.rds
 mad_thr=0.5
 out_pref=./betas.Regressed
 
-ScriptDir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/Scripts
+ScriptDir=./R
 
 
 Rscript ${ScriptDir}/3.MAD.Filtering.R $beta_file $mad_thr $out_pref
