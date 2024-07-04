@@ -1,10 +1,11 @@
 args<-commandArgs(TRUE)
 
-net_file <- args[1]
-module_name <- args[2]
-weighted_ <- ifelse(args[3]=="T",T,F)
-threshold_ <- as.numeric(args[4])
-out_pref <- args[5]
+net_file <- trimws(args[1])
+module_name <- trimws(args[2])
+weighted_ <- trimws(ifelse(args[3]=="T",T,F))
+threshold_ <- trimws(as.numeric(args[4]))
+out_pref <- trimws(args[5])
+TOM.Dir <- trimws(args[6])
 
 print("Input arguments:")
 print(paste("    Network file:",net_file))
@@ -19,32 +20,32 @@ allowWGCNAThreads()
 options(stringsAsFactors = FALSE)
 
 #########################################
-
-print("Openning network file...")
+if(is.na(TOM.Dir) | (TOM.Dir=="")){
+  TOM.Dir <- dirname(net_file)
+}
+message("Openning network file...")
 net = readRDS(net_file)
 
-print("Finding Module nodes and blocks...")
+message("Finding Module nodes and blocks...")
 module.nodes.index = which(net$colors==module_name)
 module.blocks = net$blocks[module.nodes.index]
 
-print("Module are in the following blocks:")
-print(unique(module.blocks))
+message("Module are in the following blocks: ",unique(module.blocks))
 
 for (b in unique(module.blocks)) {
   
-  print(paste("Loading block",b,"..."))
+  message("Loading block ",b,"...")
   load(paste0(dirname(net_file),"/",net$TOMFiles[b]))
   
-  print(paste("Convert block",b,"To matrix ..."))
+  message("Convert block ",b," To matrix ...")
   TOM.mat = as.matrix(TOM)
   module.nodes.TOM.index = net$blockGenes[[b]] %in% module.nodes.index
   module.TOM.mat=TOM.mat[module.nodes.TOM.index,module.nodes.TOM.index]
   
-  print(paste("Export Cytoscape data for block",b,"..."))
+  message("Export Cytoscape data for block ",b,"...")
   cytoscape = exportNetworkToCytoscape(adjMat = module.TOM.mat,weighted = weighted_ , threshold = threshold_,
                                        edgeFile = paste0(out_pref,".",module_name,".Block.",b,".Thresh.",threshold_,".egdeData.txt"),
                                        nodeFile = paste0(out_pref,".",module_name,".Block.",b,".Thresh.",threshold_,".nodeData.txt"),
                                        nodeNames = names(module.nodes.index[module.blocks==b]))
 }
 
-print("All done!")
