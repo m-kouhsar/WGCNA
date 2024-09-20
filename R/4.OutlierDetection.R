@@ -1,10 +1,10 @@
 args <- commandArgs(TRUE)
 
-beta_file <- args[1] 
-out_pref <- args[2]
+expr_file <- trimws(args[1])
+out_pref <- trimws(args[3])
 
 cat("Input arguments:\n")
-cat("    Beta value file:",beta_file,"\n")
+cat("    Expression data file:",expr_file,"\n")
 cat("    Output prefix:",out_pref,"\n")
 cat("\n")
 
@@ -16,64 +16,98 @@ options(stringsAsFactors = FALSE)
 suppressMessages(library(stringr))
 suppressMessages(library(ggplot2))
 suppressMessages(library(dendextend))
+suppressMessages(library(factoextra))
+suppressMessages(library(Rtsne))
 
-cat("Reading beta values...\n")
-betas <- readRDS(file=beta_file)
+source("Scripts/mahalanobis.outlier.R")
 
-## finding outlier samples
-cat("Hclust...\n")
+cat("Reading the data...\n")
+expr_ <- readRDS(file=expr_file)
+
+cat("Finding outliers using Mahalanobis distance and Chi-squared dstribution...\n")
+mahala.tsne <- mahalanobis.outlier(Data = expr_ , method = "tsne")
+mahala.pca <- mahalanobis.outlier(Data = expr_ , method = "pca")
+
+tiff(filename = paste0(out_pref,".Outlier.tSNE.Mahalanobis.tif"), res = 300, width = 6 , height = 6 , units = "in")
+print(mahala.tsne$Plot)
+graphics.off()
+
+tiff(filename = paste0(out_pref,".Outlier.PCA.Mahalanobis.tif"), res = 300, width = 6 , height = 6 , units = "in")
+print(mahala.pca$Plot)
+graphics.off()
+
+outliers.tsne <- mahala.tsne$Data.2D
+outliers.pca <- mahala.pca$Data.2D
+
+cat("hierarchical clustering...\n")
 
 cat("  Euclidean distance...\n")
-distance <- dist(t(betas),method = "euclidean")
-hclust.euc.ave <- hclust(distance,method = "average")
+distance <- dist(t(expr_),method = "euclidean")
+hclust.euc.av <- hclust(distance,method = "average")
 hclust.euc.ward <- hclust(distance,method = "ward.D2")
 hclust.euc.sing <- hclust(distance,method = "single")    #This method select min distance 
 hclust.euc.comp <- hclust(distance,method = "complete")  #This method select max distance
 hclust.euc.cent <- hclust(distance,method = "centroid")
 
 cat("  Correlation-based distance...\n")
-cols.cor <- cor(betas, use = "pairwise.complete.obs", method = "pearson")
+cols.cor <- cor(expr_, use = "pairwise.complete.obs", method = "pearson")
 distance <- as.dist(1 - cols.cor)
-hclust.cor.ave <- hclust(distance,method = "average")
+hclust.cor.av <- hclust(distance,method = "average")
 hclust.cor.ward <- hclust(distance,method = "ward.D2")
 hclust.cor.sing <- hclust(distance,method = "single")
 hclust.cor.comp <- hclust(distance,method = "complete")
-hclust.cor.cent <- hclust(distance,method = "centroid")
+hclust.cor.cent <- hclust(distance,method = "centroid")  
 
-cat("PCA...\n")
-pc <- prcomp(t(betas))
-pc.importance <- summary(pc)$importance[2,]
-pc <- as.data.frame(pc$x[,1:2])
+labelCol <- rep("black" , times = ncol(expr_))
+labelCol[outliers.pca$Outlier == "Yes"] = "blue"
+labelCol[outliers.tsne$Outlier == "Yes"] = "green"
+labelCol[(outliers.pca$Outlier == "Yes") & (outliers.tsne$Outlier == "Yes")] = "red"
 
-p1 <- ggplot() +geom_point(data = pc,aes(x = PC1,y = PC2))+
-      xlab(paste0("PC1 ","(",round(pc.importance[1],digits = 2),")")) + 
-      ylab(paste0("PC2 ","(",round(pc.importance[2],digits = 2),")")) + ggtitle("Samples PCA plot")
+label.size = 0.7
+title.size = 1.5
+hclust.euc.av <-  hclust.euc.av %>% as.dendrogram %>% hang.dendrogram %>%
+  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_cex", label.size) 
+hclust.euc.comp <-  hclust.euc.comp %>% as.dendrogram %>% hang.dendrogram %>%
+  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_cex", label.size) 
+hclust.euc.ward <-  hclust.euc.ward %>% as.dendrogram %>% hang.dendrogram %>%
+  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_cex", label.size) 
+hclust.euc.sing <-  hclust.euc.sing %>% as.dendrogram %>% hang.dendrogram %>%
+  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_cex", label.size)
+hclust.euc.cent <-  hclust.euc.cent %>% as.dendrogram %>% hang.dendrogram %>%
+  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_cex", label.size)
 
-cat("Saving plots...\n")
-pdf(file = paste0(out_pref,".OutlierDetection.hclust.pdf"),width = 24,height = 20)
-par(cex = 0.6)
-par(mar = c(0,4,2,0)) 
 
-plot(hclust.cor.cent, main = "Sample clustering, distance=(1-correlation), method=Centroid", sub="", xlab="", cex.lab = 1.5, cex.axis = 1.5, cex.main = 2)
-plot(hclust.cor.comp, main = "Sample clustering, distance=(1-correlation), method=Complete", sub="", xlab="", cex.lab = 1.5, cex.axis = 1.5, cex.main = 2)
-plot(hclust.cor.sing, main = "Sample clustering, distance=(1-correlation), method=Single", sub="", xlab="", cex.lab = 1.5, cex.axis = 1.5, cex.main = 2)
-plot(hclust.cor.ward, main = "Sample clustering, distance=(1-correlation), method=Ward.D2", sub="", xlab="", cex.lab = 1.5, cex.axis = 1.5, cex.main = 2)
-plot(hclust.cor.ave, main = "Sample clustering, distance=(1-correlation), method=Average", sub="", xlab="", cex.lab = 1.5, cex.axis = 1.5, cex.main = 2)
+hclust.cor.av <-  hclust.cor.av %>% as.dendrogram %>% hang.dendrogram %>%
+  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_cex", label.size) 
+hclust.cor.comp <-  hclust.cor.comp %>% as.dendrogram %>% hang.dendrogram %>%
+  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_cex", label.size) 
+hclust.cor.ward <-  hclust.cor.ward %>% as.dendrogram %>% hang.dendrogram %>%
+  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_cex", label.size) 
+hclust.cor.sing <-  hclust.cor.sing %>% as.dendrogram %>% hang.dendrogram %>%
+  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_cex", label.size) 
+hclust.cor.cent <-  hclust.cor.cent %>% as.dendrogram %>% hang.dendrogram %>%
+  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_cex", label.size)
 
-plot(hclust.euc.cent, main = "Sample clustering, distance=euclidean, method=Centroid", sub="", xlab="", cex.lab = 1.5, cex.axis = 1.5, cex.main = 2)
-plot(hclust.euc.comp, main = "Sample clustering, distance=euclidean, method=Complete", sub="", xlab="", cex.lab = 1.5, cex.axis = 1.5, cex.main = 2)
-plot(hclust.euc.sing, main = "Sample clustering, distance=euclidean, method=Single", sub="", xlab="", cex.lab = 1.5, cex.axis = 1.5, cex.main = 2)
-plot(hclust.euc.ward, main = "Sample clustering, distance=euclidean, method=Ward.D2", sub="", xlab="", cex.lab = 1.5, cex.axis = 1.5, cex.main = 2)
-plot(hclust.euc.ave, main = "Sample clustering, distance=euclidean, method=Average", sub="", xlab="", cex.lab = 1.5, cex.axis = 1.5, cex.main = 2)
-
+tiff(filename = paste0(out_pref,"Outlier.hclust.tif"),res = 600 , units = "in" , width = 8 , height = 14)
+par(mfrow=c(10,1), mar=c(2,3,2,1))
+plot(hclust.euc.av, main = "Euclidean distance, Average method", xlab = "", sub = "", cex.main = title.size)
+plot(hclust.euc.sing, main = "Euclidean distance, Single method", xlab = "", sub = "", cex.main = title.size)
+plot(hclust.euc.comp, main = "Euclidean distance, Complete method", xlab = "", sub = "", cex.main = title.size)
+plot(hclust.euc.ward, main = "Euclidean distance, Ward.D2 method", xlab = "", sub = "", cex.main = title.size)
+plot(hclust.euc.cent, main = "Euclidean distance, Ward.D2 method", xlab = "", sub = "", cex.main = title.size)
+plot(hclust.cor.av, main = "Correlation distance, Average method", xlab = "", sub = "", cex.main = title.size)
+plot(hclust.cor.sing, main = "Correlation distance, Single method", xlab = "", sub = "", cex.main = title.size)
+plot(hclust.cor.comp, main = "Correlation distance, Complete method", xlab = "", sub = "", cex.main = title.size)
+plot(hclust.cor.ward, main = "Correlation distance, Ward.D2 method", xlab = "", sub = "", cex.main = title.size)
+plot(hclust.cor.cent, main = "Correlation distance, Ward.D2 method", xlab = "", sub = "", cex.main = title.size)
 graphics.off()
-
-pdf(file = paste0(out_pref,".OutlierDetection.PCA.pdf"))
-print(p1)
-
-graphics.off()
-
-cat("All done!")
-cat("\n")
-
-
