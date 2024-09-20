@@ -36,9 +36,9 @@ tiff(filename = paste0(out_pref,".Outlier.PCA.Mahalanobis.tif"), res = 300, widt
 print(mahala.pca$Plot)
 graphics.off()
 
-outliers.tsne <- mahala.tsne$Data.2D
-outliers.pca <- mahala.pca$Data.2D
-
+outliers <- data.frame(Sample = rownames(mahala.pca$Data.2D) , Outlier.PCA = mahala.pca$Data.2D$Outlier , 
+                       Outlier.tSNE = mahala.tsne$Data.2D$Outlier)
+write.csv(outliers , file = paste0(out_pref,"Outliers.csv"))
 cat("hierarchical clustering...\n")
 
 cat("  Euclidean distance...\n")
@@ -59,9 +59,9 @@ hclust.cor.comp <- hclust(distance,method = "complete")
 hclust.cor.cent <- hclust(distance,method = "centroid")  
 
 labelCol <- rep("black" , times = ncol(expr_))
-labelCol[outliers.pca$Outlier == "Yes"] = "blue"
-labelCol[outliers.tsne$Outlier == "Yes"] = "green"
-labelCol[(outliers.pca$Outlier == "Yes") & (outliers.tsne$Outlier == "Yes")] = "red"
+labelCol[outliers$Outlier.PCA == "Yes"] = "blue"
+labelCol[outliers$Outlier.tSNE == "Yes"] = "green"
+labelCol[(outliers$Outlier.PCA == "Yes") & (outliers$Outlier.tSNE == "Yes")] = "red"
 
 label.size = 0.7
 title.size = 1.5
