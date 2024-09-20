@@ -19,7 +19,7 @@ suppressMessages(library(dendextend))
 suppressMessages(library(factoextra))
 suppressMessages(library(Rtsne))
 
-source("Scripts/mahalanobis.outlier.R")
+source("./mahalanobis.outlier.R")
 
 cat("Reading the data...\n")
 expr_ <- readRDS(file=expr_file)
