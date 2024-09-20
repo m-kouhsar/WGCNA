@@ -37,10 +37,21 @@ variables_num <- str_split(variables_num,pattern = ',',simplify = T)[1,]
 variables_fact <- str_split(variables_fact,pattern = ',',simplify = T)[1,]
 
 for (i in 1:length(variables_fact)) {
+  if(any(is.na(pheno[,variables_fact[i]]))){
+    cat(variables_fact[i], " contains missing value. A random value will be replaced.")
+    missing.index <- which(is.na(pheno[,variables_fact[i]]))
+    pheno[missing.index,variables_fact[i]] <- sample(x = pheno[-missing.index,variables_fact[i]],
+                                                     size = length(missing.index),replace = T)
+  }
   pheno[,variables_fact[i]] <- as.numeric(as.factor(pheno[,variables_fact[i]]))
 }
 for (i in 1:length(variables_num)) {
   pheno[,variables_num[i]] <- as.numeric(pheno[,variables_num[i]])
+  if(any(is.na(pheno[,variables_num[i]]))){
+    cat(variables_num[i], " contains missing value. The average value will be replaced.")
+    missing.index <- which(is.na(pheno[,variables_num[i]]))
+    pheno[missing.index,variables_num[i]] <- mean(pheno[-missing.index,variables_num[i]])
+  }
 }
 
 ##############################################################
