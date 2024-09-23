@@ -42,20 +42,15 @@ Merged.Module.Membership.Plot <- function(net.colors, expr.mat1, expr.mat2, trai
   
   ##################################################################################
   print("Calculating Gene Significant and P values based on expression matrix 1...")
-  geneTraitSignificance1 = as.data.frame(cor(t(expr.mat1), as.numeric(as.factor(trait1[,1])), method = "spearman"))
+  geneTraitSignificance1 = as.data.frame(cor(t(expr.mat1), as.numeric(as.factor(trait1)), method = "spearman"))
   GSPvalue1 = as.data.frame(corPvalueStudent(as.matrix(geneTraitSignificance1), nSamples1))
   GSPvalue1.adj = apply(GSPvalue1,2,function(x){p.adjust(x,method = "bonferroni")})
   
-  names(geneTraitSignificance1) = names(trait1)
-  names(GSPvalue1) = names(trait1)
   ###################################################################################
   print("Calculating Gene Significant and P values based on expression matrix 2...")
-  geneTraitSignificance2 = as.data.frame(cor(t(expr.mat2), as.numeric(as.factor(trait2[,1])), method = "spearman"))
+  geneTraitSignificance2 = as.data.frame(cor(t(expr.mat2), as.numeric(as.factor(trait2)), method = "spearman"))
   GSPvalue2 = as.data.frame(corPvalueStudent(as.matrix(geneTraitSignificance2), nSamples2))
   GSPvalue2.adj = apply(GSPvalue2,2,function(x){p.adjust(x,method = "bonferroni")})
-  
-  names(geneTraitSignificance2) = names(trait2)
-  names(GSPvalue2) = names(trait2)
   
   ################################################################################
   result <- vector(mode = "list",length = length(modules))
@@ -77,7 +72,7 @@ Merged.Module.Membership.Plot <- function(net.colors, expr.mat1, expr.mat2, trai
           geom_smooth(data = plot.data2, aes(y = y, x = x, colour=legend.value[2]),method = "lm",se = T) +
           scale_colour_manual(name=legend.title, breaks =legend.value ,values=c("steelblue","darkred")) + 
           xlab(paste("Module Membership in", modules[i], "module")) +
-          ylab(paste("Probe significance for",names(trait1))) + 
+          ylab(paste("Probe significance")) + 
           geom_text(x = 0, y = max(c(plot.data1$y,plot.data2$y))+0.01, label = paste(sep = "", "corr = ", round(c1$estimate, 2), ", p = ", 
                     formatC(c1$p.value, format = "e", digits = 2)),color = "steelblue", hjust = 0, vjust = 1) + 
           geom_text(x = 0, y = max(c(plot.data1$y,plot.data2$y)), label = paste(sep = "", "corr = ", round(c2$estimate, 2), ", p = ", 
