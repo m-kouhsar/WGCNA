@@ -29,7 +29,7 @@ mahala.tsne <- mahalanobis.outlier(Data = expr_ , method = "tsne", seed=12345)
 mahala.pca <- mahalanobis.outlier(Data = expr_ , method = "pca")
 
 tiff(filename = paste0(out_pref,".Outlier.tSNE.Mahalanobis.tif"), res = 300, width = 6 , height = 6 , units = "in")
-print(mahala.tsne$Plot)
+print(mahala.tsne$Plot.2D)
 graphics.off()
 
 tiff(filename = paste0(out_pref,".Outlier.PCA.Mahalanobis.tif"), res = 300, width = 6 , height = 6 , units = "in")
