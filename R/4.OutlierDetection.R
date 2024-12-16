@@ -33,7 +33,7 @@ print(mahala.tsne$Plot.2D)
 graphics.off()
 
 tiff(filename = paste0(out_pref,".Outlier.PCA.Mahalanobis.tif"), res = 300, width = 6 , height = 6 , units = "in")
-print(mahala.pca$Plot)
+print(mahala.pca$Plot.2D)
 graphics.off()
 
 outliers <- data.frame(Sample = rownames(mahala.pca$Data.2D) , Outlier.PCA = mahala.pca$Data.2D$Outlier , 
