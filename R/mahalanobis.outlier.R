@@ -1,9 +1,11 @@
-mahalanobis.outlier <- function(Data , method = "pca", plot.title=NA){
+mahalanobis.outlier <- function(Data , method = "pca", plot.title=NA , seed = NA){
   
   suppressMessages(library(car))
   suppressMessages(library(dplyr))
   suppressMessages(library(Rtsne))
-  set.seed(12345)
+  if(!is.na(seed)){
+    set.seed(seed = seed) 
+  }
   method = match.arg(arg = method , choices = c("pca" , "tsne") , several.ok = F)
   
   if(method == "tsne"){
