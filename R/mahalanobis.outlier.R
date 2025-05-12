@@ -2,6 +2,7 @@ mahalanobis.outlier <- function(Data , method = "pca", plot.title=NA , tsne.seed
   
   suppressMessages(library(car))
   suppressMessages(library(dplyr))
+  suppressMessages(library(ggplot2))
   
   if(!is.na(tsne.seed)){
     set.seed(seed = tsne.seed) 
