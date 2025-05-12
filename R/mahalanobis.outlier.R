@@ -3,8 +3,8 @@ mahalanobis.outlier <- function(Data , method = "pca", plot.title=NA , tsne.seed
   suppressMessages(library(car))
   suppressMessages(library(dplyr))
   
-  if(!is.na(seed)){
-    set.seed(seed = seed) 
+  if(!is.na(tsne.seed)){
+    set.seed(seed = tsne.seed) 
   }
   method = match.arg(arg = method , choices = c("pca" , "tsne") , several.ok = F)
   
