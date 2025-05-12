@@ -2,13 +2,14 @@ mahalanobis.outlier <- function(Data , method = "pca", plot.title=NA , seed = NA
   
   suppressMessages(library(car))
   suppressMessages(library(dplyr))
-  suppressMessages(library(Rtsne))
+  
   if(!is.na(seed)){
     set.seed(seed = seed) 
   }
   method = match.arg(arg = method , choices = c("pca" , "tsne") , several.ok = F)
   
   if(method == "tsne"){
+    suppressMessages(library(Rtsne))
     tsne_out <- Rtsne(t(Data),dims = 2,)
     Data.2D <- data.frame(D1 = tsne_out$Y[,1], 
                           D2 = tsne_out$Y[,2])
