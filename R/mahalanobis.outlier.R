@@ -1,4 +1,4 @@
-mahalanobis.outlier <- function(Data , method = "pca", plot.title=NA , seed = NA){
+mahalanobis.outlier <- function(Data , method = "pca", plot.title=NA , tsne.seed = NA, pca.scale=T , pca.center=T){
   
   suppressMessages(library(car))
   suppressMessages(library(dplyr))
@@ -16,9 +16,9 @@ mahalanobis.outlier <- function(Data , method = "pca", plot.title=NA , seed = NA
     rownames(Data.2D) <- colnames(Data)
   }
   if(method == "pca"){
-    pc <- prcomp(t(Data),scale. = T,center = T)
+    pc <- prcomp(t(Data),scale. = pca.scale,center = pca.center , rank. =2)
     pc.importance <- summary(pc)$importance[2,]
-    Data.2D <- as.data.frame(pc$x[,1:2])
+    Data.2D <- as.data.frame(pc$x)
   }
   
   center_ <- colMeans(Data.2D)
