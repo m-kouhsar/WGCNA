@@ -9,10 +9,15 @@
 #SBATCH --mail-type=END # send email at job completion
 #SBATCH --mail-user=m.kouhsar@exeter.ac.uk # email address
 
-beta_file=./betas.Regressed.MAD.0.5.rds
-out_pref=./betas.Regressed.MAD.0.5
+input_expression=./betas.rds
+input_phenotype=./pheno.csv
+variables_fact=Sex
+variables_num=Age
+model_lm=~Age+Sex
+out_pref=./data
 
-ScriptDir=./R
+
+ScriptDir=/lustre/projects/Research_Project-191391/Morteza/Genotyping/Pitts.All/wgcna/Revision.June2024/Scripts
 
 
-Rscript ${ScriptDir}/4.OutlierDetection.R $beta_file $out_pref
+Rscript ${ScriptDir}/2.RegressOut.R $input_expression $input_phenotype $variables_fact $variables_num $model_lm $out_pref

@@ -3,23 +3,21 @@
 #SBATCH --export=ALL # export all environment variables to the batch job.
 #SBATCH -D . # set working directory to .
 #SBATCH -p mrcq # submit to the parallel test queue
-#SBATCH --time=5:00:00 # Maximum wall time for the job
+#SBATCH --time=24:00:00 # Maximum wall time for the job
 #SBATCH --nodes=1 # specify number of nodes.
 #SBATCH --ntasks-per-node=16 # specify number of processors.
 #SBATCH --mail-type=END # send email at job completion
 #SBATCH --mail-user=m.kouhsar@exeter.ac.uk # email address
 
 
-Data_File=./betas.Regressed.MAD.0.5.rds
-SoftPow=6
-Block_Size=30000
-min_Module_Size=100
-Save_TOM=No
-Plot_Dendro=No
-OutPrefix=./betas.Regressed.MAD.0.5
-
-ScriptDir=./R
+data_file=./betas.rds
+block_size=30000
+out_pref=./betas
 
 
-Rscript ${ScriptDir}/6.WGCNA.BlockwiseNet.R $Data_File $SoftPow $Block_Size $min_Module_Size $Save_TOM $Plot_Dendro $OutPrefix
+script_dir=./R
+
+
+Rscript $script_dir/5.WGCNA.PicSoftThresh.R $data_file $block_size $out_pref
+
 

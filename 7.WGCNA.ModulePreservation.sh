@@ -11,10 +11,10 @@
 #SBATCH --output=%x.%j.out
 #SBATCH --error=%x.%j.err
 
-exp_file_1=./betas1.Regressed.MAD.0.5.rds
-exp_file_2=./betas2.Regressed.MAD.0.5.rds
-net_file_1=betas2.Regressed.MAD.0.5.WGCNA.Net.rds
-modules=seashell4,mediumpurple3,thistle2,green4,firebrick3,sienna2,lightcoral,antiquewhite,magenta1,lightcyan,burlywood,linen,thistle3,lavenderblush,darkgoldenrod1,tan2,greenyellow,whitesmoke,orange,midnightblue,mistyrose,darkred,lightblue1
+exp_file_1=./betas1.rds
+exp_file_2=./betas2.rds
+net_file_1=./WGCNA.Net.rds
+modules=seashell4,mediumpurple3,thistle2,green4,firebrick3,sienna2,lightcoral,orange,midnightblue,mistyrose,darkred,lightblue1
 max_size=1000
 max_gold=1000
 n_permut=1000
