@@ -88,21 +88,6 @@ if(!identical(colnames(expr) , rownames(pheno))){
   pheno = pheno[index ,]
 }
 
-pheno <- pheno[,c(trait,covars_fact,covars_num)]
-pheno[,trait] <- as.numeric(as.factor(pheno[,trait]))
-
-if(covars_fact[1] != ""){
-  for (i in 1:length(covars_fact)) {
-    pheno[,covars_fact[i]] <- as.numeric(as.factor(pheno[,covars_fact[i]]))
-  }
-}
-  
-if(covars_num[1] != ""){
-  for (i in 1:length(covars_num)) {
-    pheno[,covars_num[i]] <- as.numeric(pheno[,covars_num[i]])
-  }
-}
-
 if(tolower(modules=="all")){
   modules = unique(net$colors)
 }
@@ -119,16 +104,16 @@ for (k in 1:length(analysis.type)) {
   
   cat("Analysis based on ",analysis.type[k], "method...\n")
   
-  result <- data.frame.relationship(df1 = net$MEs[,modules],df2 = pheno,method = analysis.type[k], 
-                                    plot.title = paste("ME-Trait using",analysis.type[k],"correlation"),
-                                    return_melt = F,Plot = corr.plot,categorical_columns = c(trait,covars_fact))
+  result <- ModuleTrait(MEs = net$MEs , Pheno = pheno , method = analysis.type[k],Plot = T,plot.title = "Module Trait",
+                        return_melt = F,Trait = "Trait",Factor_Covars = covars_fact , Numeric_Covars = covars_num)
   
   cat("Saving results...\n")
   if(save_csv){
     modules.size <- as.data.frame(table(net$colors))
     index <- match(rownames(result$Result),modules.size$Var1)
     result$Result$ModuleSize <- modules.size$Freq[index]
-    trait.pval <- result$Result[,paste0(trait,".Pvalue")]
+    index <- str_detect(string = colnames(result$Result) , pattern = paste0(trait , ".*\\.Pval$") )
+    trait.pval <- result$Result[,index]
     result$Result <- result$Result[order(trait.pval,decreasing = F),]
     write.csv(result$Result , file=paste0(out_pref,".ModuleTrait.",analysis.type[k],".csv"))
   }
@@ -141,13 +126,14 @@ for (k in 1:length(analysis.type)) {
   if(scatter.plot){
     p=list()
     for (i in 1:length(modules)) {
-      p[[modules[i]]] = scatter.smooth.with.lm(pheno[,trait],net$MEs[,modules[i]],xlabel = trait,ylabel = "ME",title = modules[i])
+      p[[modules[i]]] = scatter.smooth.with.lm(x = as.numeric(as.factor(pheno[,trait])),y = net$MEs[,modules[i]],xlabel = trait,ylabel = "ME",title = modules[i])
     }
     
-    pdf(filename = paste0(out_pref,"ModuleTrait.",analysis.type[k],".ScatPlot.pdf"), width = 10, height = 10)
+    pdf(file = paste0(out_pref,"ModuleTrait.",analysis.type[k],".ScatPlot.pdf"), width = 10, height = 10)
     grid.arrange(grobs=p)
     graphics.off()
   }
   
 }
+
 
