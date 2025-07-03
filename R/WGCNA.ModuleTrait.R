@@ -2,13 +2,11 @@
 
 # modules = Names of modules separated with comma, "all" for running analysis on all modules
 # analysis.type= one of the following options (or more than one separated by comma)
-#        "p" -> Pearson correlation
-#        "s" -> Spearman correlation
-#        "l" -> Linear regression
-#        "ps" -> Pearson correlation for numeric variables and Spearman correlation for categorical variables
-#        "tps" -> Pearson correlation for two numeric variables,
-#                   Spearman correlation for two categorical variables or one categorical (more than one groups) 
-#                   and one numeric variables, t-test for a binary and a numeric variable
+#        "lm" -> Linear regression adjusted for all covariates
+#        "cor" -> Pearson correlation for numeric variables and Spearman correlation for categorical variables
+#        "test" -> Pearson correlation for numeric variables
+#                 t-test for binary variables
+#                 anova test for categorical and numeric variables
 
 # calc_ME= "yes" or "no", Calculate Module Eigengene from expression matrix
 # corr.plot= "yes" or "no" , correlation plot between MEs and phenotype of interest
