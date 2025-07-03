@@ -1,55 +1,52 @@
-data.frame.relationship <- function(df1 , df2, method="prsp", Plot=T,plot.title="",return_melt=T, categorical_columns){
+ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_melt=T, 
+                                    Trait , Factor_Covars, Numeric_Covars){
   # method:
-  #   p -> Pearson correlation 
-  #   s -> Spearman correlation 
-  #   l -> Linear regression 
-  #   ps -> Pearson correlation for numeric variables and Spearman correlation for categorical variables 
-  #   tps -> Pearson correlation for two numeric variables, Spearman correlation for two categorical variables 
-  #          or one categorical (more than two groups) and one numeric variables, t-test for a binary and a numeric variable
+  #        "lm" -> Linear regression adjusted for all covariates
+  #        "cor" -> Pearson correlation for numeric variables and Spearman correlation for categorical variables
+  #        "test" -> Pearson correlation for numeric variables
+  #                 t-test for binary variables
+  #                 anova test for categorical and numeric variables
   
-  method <- match.arg(method,c("p","s","ps","l","tps"),several.ok = F)
-  if(!is.data.frame(df1)){
-    stop("df1 must be a dataframe")
+  suppressMessages(library(QuantPsyc))
+  method <- match.arg(method,c("cor","lm","test"),several.ok = F)
+  
+  if( !(Trait %in% colnames(Pheno))){
+    stop("Trait variable ('", Trait,"') was not found in Pheno.")
   }
-  if(!is.data.frame(df1)){
-    stop("df2 must be a dataframe")
+  if( !all(Factor_Covars %in% colnames(Pheno))){
+    stop("The following Factor variables were not found in Pheno:\n",setdiff(Factor_Covars , colnames(Pheno)))
   }
-  if(nrow(df1) != nrow(df2)){
-    stop("Two dataframes must have the same number of rows")
+  if( !all(Numeric_Covars %in% colnames(Pheno))){
+    stop("The following Numerical variables were not found in Pheno:\n",setdiff(Numeric_Covars , colnames(Pheno)))
   }
-  cor_val <- matrix(data = NA, nrow = ncol(df1), ncol = ncol(df2))
-  colnames(cor_val) <- names(df2)
-  rownames(cor_val) <- names(df1)
+  if(nrow(MEs) != nrow(Pheno)){
+    stop("MEs and Pheno dataframes must have the same number of rows")
+  }
+  all_var <- c(Trait , Factor_Covars , Numeric_Covars)
+  cor_val <- matrix(data = NA, nrow = ncol(MEs), ncol = length(all_var))
+  colnames(cor_val) <- all_var
+  rownames(cor_val) <- names(MEs)
   cor_p <- cor_val
   cor_plot <- NA
   
-  if(method=="p"){
-    for(i in names(df1)){
-      for (j in names(df2)) {
-        res1<-cor.test(as.numeric(df1[,i]),as.numeric(df2[,j]), method="pearson",exact = FALSE)
-        cor_val[i,j]<-res1$estimate
-        cor_p[i,j]<-res1$p.value
-      }
-    }
-  }
-  if(method=="s"){
-    for(i in names(df1)){
-      for (j in names(df2)) {
-        res1<-cor.test(as.numeric(df1[,i]),as.numeric(df2[,j]), method="spearman",exact = FALSE)
-        cor_val[i,j]<-res1$estimate
-        cor_p[i,j]<-res1$p.value
-      }
-    }
-  }
-  if(method=="ps"){
-    for(i in names(df1)){
-      for (j in names(df2)) {
-        if((i %in% categorical_columns)|(j %in% categorical_columns)){
-          res1<-cor.test(as.numeric(df1[,i]),as.numeric(df2[,j]), method="spearman",exact = FALSE)
+  if(method=="cor"){
+    
+    colnames(cor_val) <- paste0(colnames(cor_val),".Corr")
+    
+    for(i in 1:ncol(MEs)){
+      
+      for (j in 1:length(all_var)) {
+        
+        if(all_var[j] %in% c(Trait , Factor_Covars)){
+          
+          message("Spearman correlation test between ",colnames(MEs)[i] , " and ",all_var[j])
+          res1<-cor.test(as.numeric(MEs[,i]),as.numeric(as.factor(Pheno[,all_var[j]])), method="spearman",exact = FALSE)
           cor_val[i,j]<-res1$estimate
           cor_p[i,j]<-res1$p.value
+          
         }else{
-          res1<-cor.test(as.numeric(df1[,i]),as.numeric(df2[,j]), method="pearson",exact = FALSE)
+          message("Pearson correlation test between ",colnames(MEs)[i] , " and ",all_var[j])
+          res1<-cor.test(as.numeric(MEs[,i]),as.numeric(Pheno[,all_var[j]]), method="pearson",exact = FALSE)
           cor_val[i,j]<-res1$estimate
           cor_p[i,j]<-res1$p.value
         }
@@ -58,101 +55,80 @@ data.frame.relationship <- function(df1 , df2, method="prsp", Plot=T,plot.title=
   }
   
   # https://stackoverflow.com/questions/52811684/running-a-two-sample-t-test-with-unequal-sample-size-in-r
-  if(method=="tps"){
-    for(i in names(df1)){
-      for (j in names(df2)) {
-        if(i %in% categorical_columns){
-          flag1=T
-        }else{
-          flag1=F
-        }
-        if(j %in% categorical_columns){
-          flag2=T
-        }else{
-          flag2=F
-        }
-        if(!flag1 & !flag2){
-          res1<-cor.test(as.numeric(df1[,i]),as.numeric(df2[,j]), method="pearson",exact = FALSE)
-          cor_val[i,j]<-res1$estimate
-          cor_p[i,j]<-res1$p.value
-        }
-        if(flag1 & !flag2){
-          df <- cbind.data.frame(c1=df1[,i],c2=df2[,j])
-          df.split <- split(df,as.factor(df$c1),drop = T)
+  if(method=="test"){
+    
+    col.type <- vector(length = ncol(cor_val) , mode = "character")
+    
+    for(i in 1:ncol(MEs)){
+      
+      for (j in 1:length(all_var)) {
+        
+        if(all_var[j] %in% c(Trait , Factor_Covars)){
+          
+          df <- cbind.data.frame(module=MEs[,i],variable=Pheno[,all_var[j]])
+          df.split <- split(df,as.factor(df$variable),drop = T)
+          
           if(length(df.split) == 2){
-            if(length(df.split[[1]]$c2) == length(df.split[[2]]$c2)){
-              res1 <- t.test(df.split[[1]]$c2, df.split[[2]]$c2, paired = T)
-              cor_val[i,j]<-res1$estimate
-              cor_p[i,j]<-res1$p.value
-            }else{
-              if(var.test(df.split[[1]]$c2, df.split[[2]]$c2)$p.value < 0.05){
-                res1 <- t.test(df.split[[1]]$c2, df.split[[2]]$c2, var.equal = F)
-                cor_val[i,j]<-abs(res1$estimate[1] - res1$estimate[2])
-                cor_p[i,j]<-res1$p.value
-              }
-              else{
-                res1 <- t.test(df.split[[1]]$c2, df.split[[2]]$c2, var.equal = T)
-                cor_val[i,j]<-abs(res1$estimate[1] - res1$estimate[2])
-                cor_p[i,j]<-res1$p.value
-              }
-            }
-          }else{
-            res1<-cor.test(as.numeric(df1[,i]),as.numeric(df2[,j]), method="spearman",exact = FALSE)
-            cor_val[i,j]<-res1$estimate
+            
+            message("T test on ", colnames(MEs)[i], " ME grouped by ",all_var[j])
+            col.type[j] = "t_stat"
+            
+            res1 <- t.test(df.split[[1]]$module, df.split[[2]]$module)
+            cor_val[i,j]<-res1$statistic
             cor_p[i,j]<-res1$p.value
-          }
-        }
-        if(!flag1 & flag2){
-          df <- cbind.data.frame(c1=df1[,i],c2=df2[,j])
-          df.split <- split(df,as.factor(df$c2),drop = T)
-          if(length(df.split) == 2){
-            if(length(df.split[[1]]$c1) == length(df.split[[2]]$c1)){
-              res1 <- t.test(df.split[[1]]$c1, df.split[[2]]$c1, paired = T)
-              cor_val[i,j]<-res1$estimate
-              cor_p[i,j]<-res1$p.value
-            }else{
-              if(var.test(df.split[[1]]$c1, df.split[[2]]$c1)$p.value < 0.05){
-                res1 <- t.test(df.split[[1]]$c1, df.split[[2]]$c1, var.equal = F)
-                cor_val[i,j]<-abs(res1$estimate[1] - res1$estimate[2])
-                cor_p[i,j]<-res1$p.value
-              }
-              else{
-                res1 <- t.test(df.split[[1]]$c1, df.split[[2]]$c1, var.equal = T)
-                cor_val[i,j]<-abs(res1$estimate[1] - res1$estimate[2])
-                cor_p[i,j]<-res1$p.value
-              }
-            }
+            
           }else{
-            res1<-cor.test(as.numeric(df1[,i]),as.numeric(df2[,j]), method="spearman",exact = FALSE)
-            cor_val[i,j]<-res1$estimate
-            cor_p[i,j]<-res1$p.value
+            
+            message("ANOVA test for ",colnames(MEs)[i] , " grouped by ",all_var[j])
+            col.type[j] = "F_val"
+            
+            res1<-aov(formula = module~variable , data = df )
+            cor_val[i,j]<-summary(res1)[[1]]["F value"][1,1]
+            cor_p[i,j]<-summary(res1)[[1]]["Pr(>F)"][1,1]
+            
           }
-        }
-        if(flag1 & flag2){
-          res1<-cor.test(as.numeric(df1[,i]),as.numeric(df2[,j]), method="spearman",exact = FALSE)
+        }else{
+          
+          message("Pearson correlation test between ",colnames(MEs)[i] , " and ",all_var[j])
+          col.type[j] = "Corr"
+          
+          res1<-cor.test(as.numeric(MEs[,i]),as.numeric(Pheno[,all_var[j]]), method="pearson",exact = FALSE)
           cor_val[i,j]<-res1$estimate
           cor_p[i,j]<-res1$p.value
         }
       }
     }
+    
+    colnames(cor_val) <- paste(colnames(cor_val) , col.type , sep = ".")
   }
   
-  if(method=="l"){
-    for(i in 1:ncol(df1)){
-      for (j in 1:ncol(df2)) {
-        
-        var1 <- paste0("df2$",names(df2)[j])
-        lm_variable <- names(df2)[-j]
-        lm_variable <- paste0("df2$",lm_variable)
-        lm_model <- paste(lm_variable,collapse = "+")
-        lm_model <- paste0(var1 , "~","df1[,names(df1)[i]]" , "+",lm_model)
-        try(res1<-lm(as.formula(lm_model) , na.action = na.omit), silent = TRUE)
-        if(class(res1) != "try-error"){
-          cor_val[i,j]<-as.numeric(lm.beta(res1)[1])
-          cor_p[i,j]<-coef(summary(res1))[2,4]
-        }
+  if(method=="lm"){
+    
+    cor_val <- vector(length = ncol(MEs) , mode = "list")
+    cor_p <- vector(length = ncol(MEs) , mode = "list")
+    names(cor_p) = names(cor_val) <- colnames(MEs)
+    lm_data <- cbind.data.frame(MEs , Pheno)
+    for(m in colnames(MEs)){
+      
+      message("Linear regression analaysis on ", m , " :")
+      
+      lm_model <- paste(m,paste(all_var , collapse = "+") , sep = "~")
+      message("      lm model: ",lm_model)
+      lm_model <- as.formula(lm_model)
+      
+      try(res1<-lm(lm_model ,data = lm_data, na.action = na.omit), silent = TRUE)
+      if(class(res1) != "try-error"){
+        lm_summary <- summary(res1)
+        cor_val[[m]]<- lm_summary$coefficients[-1,1]
+        cor_p[[m]]<- lm_summary$coefficients[-1,4]
+      }else{
+        message("lm failed!")
       }
     }
+    cor_val <- as.matrix(do.call(rbind.data.frame, cor_val))
+    cor_p <- as.matrix(do.call(rbind.data.frame, cor_p))
+    colnames(cor_val) = colnames(cor_p) = names(lm_summary$coefficients[-1,1])
+    rownames(cor_val) = rownames(cor_p) = colnames(MEs)
   }
   suppressMessages(library(reshape2))
   suppressWarnings(library(ggplot2))
@@ -160,7 +136,7 @@ data.frame.relationship <- function(df1 , df2, method="prsp", Plot=T,plot.title=
   data <- cbind.data.frame(melt(cor_val),melt(cor_p)[,3])
   names(data) <- c("var1", "var2","cor_val","cor_p")
   if(Plot){
-    #x_lab =names(df2)
+    #x_lab =names(Pheno)
     textMatrix = paste(signif(cor_val, 3), "\n(",
                        signif(cor_p, 3), ")", sep = "")
     dim(textMatrix) = dim(cor_val)
@@ -179,18 +155,9 @@ data.frame.relationship <- function(df1 , df2, method="prsp", Plot=T,plot.title=
   if(return_melt){
     return(list(Result=data[,1:4],Plot = cor_plot))
   }else{
-    colnames(cor_val) = paste0(colnames(cor_val) , ".corr")
-    colnames(cor_p) = paste0(colnames(cor_p) , ".Pvalue")
+    colnames(cor_p) = paste0(colnames(cor_p) , ".Pval")
     data <- cbind.data.frame(cor_val, cor_p)
     return(list(Result=data,Plot=cor_plot))
   }
   
 }
-scatter.smooth.with.lm <- function(x, y, xlabel="",ylabel="", title=""){
-  library(ggplot2)
-  data=cbind.data.frame(x,y)
-  ggplot(data = data, aes_string(x = x, y = y)) + geom_point() +
-    geom_smooth(method = "lm", se = T) + ggtitle(title)+xlab(xlabel)+ylab(ylabel)
-}
-######################################################################################
-
