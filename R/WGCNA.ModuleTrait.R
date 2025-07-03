@@ -57,6 +57,13 @@ suppressMessages(library(funr))
 
 source(paste0(dirname(sys.script()),"/WGCNA.ModuleTrait.Function.R"))
 
+scatter.smooth.with.lm <- function(x, y, xlabel="",ylabel="", title=""){
+  library(ggplot2)
+  data=cbind.data.frame(x,y)
+  ggplot(data = data, aes(x, y)) + geom_point() +
+    geom_smooth(method = "lm", se = T) + ggtitle(title)+xlab(xlabel)+ylab(ylabel)
+}
+
 ###############################################################
 
 cat("Reading Inputs...\n")
