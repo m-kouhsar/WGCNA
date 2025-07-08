@@ -43,7 +43,7 @@ Module.Membership.Plot <- function(net.colors, expr.mat, trait,modules, size.thr
     c <- cor.test(plot.data$MM,plot.data$GS,method = "pearson")
     print(paste("Generating Plot for",modules[i],"module..."))
     p <- ggplot(data = plot.data,aes(x=MM,y=GS))+
-      geom_point(color=modules[i])+
+      geom_point(color="black")+
       geom_smooth(method = "lm") + 
       theme_bw() + 
       theme(plot.title = element_text(hjust = 0.5))+
@@ -65,6 +65,7 @@ Module.Membership.Plot <- function(net.colors, expr.mat, trait,modules, size.thr
     Corrs$Pvalue[i] <- c$p.value
     Plots[[i]] <- p
   }
-  return(list(Plots = Plots , Cor.test = Corrs))
+  return(list(Plots = Plots , Cor.test = Corrs , MM.val = geneModuleMembership , MM.Pval = MMPvalue, MM.P.adj = MMPvalue.adj,
+                                                GS.val = geneTraitSignificance , GS.Pval = GSPvalue , GS.P.adj = GSPvalue.adj))
 }
 
