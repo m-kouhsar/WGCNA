@@ -22,7 +22,7 @@ suppressMessages(library(WGCNA))
 suppressMessages(library(ggplot2))
 
 cat("\n")
-
+dir.create(dirname(OutPrefix) , recursive = T , showWarnings = F)
 cat("Reading the data...\n")
 Data = readRDS(Data.File)
 Pheno = read.csv(Pheno.File,stringsAsFactors = F,row.names = 1)
