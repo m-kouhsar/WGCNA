@@ -8,8 +8,6 @@ Save.TOM <- args[5]
 Plot.Dendro <- args[6]
 OutPrefix <- args[7]
 
-sink(paste0(OutPrefix,".WGCNA.BlocwiseNet.log.txt"))
-
 cat("Input arguments:\n")
 cat("    Input data file:",Data.File,"\n")
 cat("    Soft Power threshold:",SoftPow,"\n")
@@ -30,7 +28,27 @@ options(stringsAsFactors = FALSE)
 Save.TOM <- ifelse(trimws(tolower(Save.TOM))=="yes",T,F)
 Plot.Dendro <- ifelse(trimws(tolower(Plot.Dendro))=="yes",T,F)
 
-Data <- readRDS(Data.File)
+cat("Reading input data...")
+if(str_ends(string = Data.File , pattern = ".rds")){
+  Data <- readRDS(Data.File)
+}else{
+  Data <- read.table(file = Data.File, stringsAsFactors = F,header = T, row.names = 1,check.names=F)
+}
+
+message("goodSamplesGenes function in WGCNA:")
+if (!gsg$allOK) {
+  
+  if (sum(!gsg$goodGenes) > 0) 
+    printFlush(paste("    Removing genes:", paste(colnames(wgcna_input)[!gsg$goodGenes], collapse = ", ")))
+  if (sum(!gsg$goodSamples) > 0) 
+    printFlush(paste("    Removing samples:", paste(rownames(wgcna_input)[!gsg$goodSamples], collapse = ", ")))
+  
+  wgcna_input <- wgcna_input[gsg$goodSamples, gsg$goodGenes]
+  print("Bad samples/genes removed. Data is now ready for WGCNA.")
+} else {
+  print("    All OK! No samples or genes need to be removed.")
+}
+
 
 cat("Generating network...\n")
 
@@ -57,5 +75,3 @@ if(Plot.Dendro){
 
 print("All done!")
 
-
-sink()

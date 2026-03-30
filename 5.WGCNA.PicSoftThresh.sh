@@ -10,14 +10,14 @@
 #SBATCH --mail-user=m.kouhsar@exeter.ac.uk # email address
 
 
-data_file=./betas.rds
+data_file=./Methylation.rds #Methylation data in rds format or Expression data in tsv format
 block_size=30000
-out_pref=./betas
+out_prefix=./Results/Cohort1
 
 
-script_dir=./R
+script_dir=./WGCNA
+#################################################################################
 
-
-Rscript $script_dir/5.WGCNA.PicSoftThresh.R $data_file $block_size $out_pref
+Rscript "$script_dir"/R/5.WGCNA.PicSoftThresh.R "$data_file" "$block_size" "$out_prefix"
 
 

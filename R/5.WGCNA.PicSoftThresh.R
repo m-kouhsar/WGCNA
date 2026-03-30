@@ -1,22 +1,48 @@
 args<-commandArgs(TRUE)
 
-Data.File <- args[1]
-block_size <- as.numeric(args[2])
-out_pref <- args[3]
+Data.File <- trimws(args[1])
+block_size <- as.numeric(trimws(args[2]))
+out_prefix <- trimws(args[3])
 
-sink(paste0(out_pref,".WGCNA.SoftPower.log.txt"))
+cat("Input arguments:\n")
+cat("    Methylation/Expression data file: ",Data.File,"\n")
+cat("    Block size: ",block_size,"\n")
+cat("    Output files prefix: ",out_prefix,"\n")
+cat("\n")
 
 cat("Loading libraries...\n")
 suppressMessages(library(WGCNA))
 allowWGCNAThreads()
 options(stringsAsFactors = FALSE)
 
-Data <- readRDS(Data.File)
+cat("Reading input data...")
+if(str_ends(string = Data.File , pattern = ".rds")){
+  Data <- readRDS(Data.File)
+}else{
+  Data <- read.table(file = Data.File, stringsAsFactors = F,header = T, row.names = 1,check.names=F)
+}
+
+wgcna_input = t(Data)
+gsg <- goodSamplesGenes(wgcna_input, verbose = 3)
+
+message("goodSamplesGenes function in WGCNA:")
+if (!gsg$allOK) {
+  
+  if (sum(!gsg$goodGenes) > 0) 
+    printFlush(paste("    Removing genes:", paste(colnames(wgcna_input)[!gsg$goodGenes], collapse = ", ")))
+  if (sum(!gsg$goodSamples) > 0) 
+    printFlush(paste("    Removing samples:", paste(rownames(wgcna_input)[!gsg$goodSamples], collapse = ", ")))
+  
+  wgcna_input <- wgcna_input[gsg$goodSamples, gsg$goodGenes]
+  print("Bad samples/genes removed. Data is now ready for WGCNA.")
+} else {
+  print("    All OK! No samples or genes need to be removed.")
+}
 
 cat("Calculating soft powers...\n")
 powers = c(c(1:10), seq(from = 12, to=20, by=2))
-sft = pickSoftThreshold(t(Data), powerVector = powers, verbose = 5, dataIsExpr = TRUE,blockSize = block_size)
-saveRDS(sft,file = paste0(out_pref,".WGCNA.SoftPower.rds"))
+sft = pickSoftThreshold(wgcna_input, powerVector = powers, verbose = 5, dataIsExpr = TRUE,blockSize = block_size)
+saveRDS(sft,file = paste0(out_prefix,".WGCNA.SoftPower.rds"))
 
 cat("Generating plots...\n")
 
@@ -24,7 +50,7 @@ sizeGrWindow(9, 5)
 par(mfrow = c(1,2))
 cex1 = 0.9
 
-pdf(file = paste0(out_pref,".WGCNA.SoftPower.pdf"))
+pdf(file = paste0(out_prefix,".WGCNA.SoftPower.pdf"))
 
 plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
     xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",
@@ -42,4 +68,3 @@ dev.off()
 
 cat("All done!")
 
-sink()

@@ -10,16 +10,16 @@
 #SBATCH --mail-user=m.kouhsar@exeter.ac.uk # email address
 
 
-Data_File=./betas.rds
+Data_File=./Methylation.rds     #Methylation data in rds format or Expression data in tsv format
 SoftPow=6
 Block_Size=30000
 min_Module_Size=100
 Save_TOM=No
 Plot_Dendro=No
-OutPrefix=./betas
+OutPrefix=./Results/Cohort1
 
-ScriptDir=./R
+ScriptDir=./WGCNA
+###############################################################################################################################
 
-
-Rscript ${ScriptDir}/6.WGCNA.BlockwiseNet.R $Data_File $SoftPow $Block_Size $min_Module_Size $Save_TOM $Plot_Dendro $OutPrefix
+Rscript "${ScriptDir}"/R/6.WGCNA.BlockwiseNet.R "$Data_File" "$SoftPow" "$Block_Size" "$min_Module_Size" "$Save_TOM" "$Plot_Dendro" "$OutPrefix"
 
