@@ -61,7 +61,7 @@ if(normalize.method == "cpm"){
 }
 
 cat("Saving filtered data...\n")
-write.table(counts , file = paste0(OutPrefix,".Filtered.rds") , row.names = T , col.names = T , sep = "\t" , quote = F)
+write.table(counts , file = paste0(OutPrefix,".Filtered.tsv") , row.names = T , col.names = T , sep = "\t" , quote = F)
 
 cat("All done!")
 cat("\n")

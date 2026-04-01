@@ -9,6 +9,7 @@ ScriptDir <- trimws(args[4])
 cat("Input arguments:\n")
 cat("    Methylation data file (rds format):",beta_file,"\n")
 cat("    Convert Beta values to M values?",convert2M,"\n")
+# Decide between M value and Beta value: https://pubmed.ncbi.nlm.nih.gov/21118553/
 cat("    Output prefix:",out_prefix,"\n")
 cat("    Scripts directory:",ScriptDir,"\n")
 cat("\n")
@@ -16,12 +17,8 @@ cat("\n")
 ##############################################################################
 
 cat("Loading libraries...\n")
-suppressMessages(library(WGCNA))
-allowWGCNAThreads()
-options(stringsAsFactors = FALSE)
 suppressMessages(library(lumi))
 suppressMessages(library(data.table))
-suppressMessages(library(ggplot2))
 cat("\n")
 ###############################################################################
 

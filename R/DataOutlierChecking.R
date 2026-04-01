@@ -24,7 +24,7 @@ suppressWarnings(suppressMessages(library(WGCNA)))
 suppressWarnings(suppressMessages(library(stringr)))
 suppressWarnings(suppressMessages(library(ggcorrplot)))
 suppressWarnings(suppressMessages(library(reshape2)))
-suppressMessages(library(dendextend))
+suppressWarnings(suppressMessages(library(dendextend)))
 cat("\n")
 ########################################################################
 #
@@ -201,49 +201,70 @@ hclust.cor.cent <- hclust(distance,method = "centroid")
 
 labelCol <- rep("black" , times = ncol(expr_mat))
 labelCol[plot_data$Outliers.Mahalanobis == "Yes"] = "orange"
-labelCol[plot_data$Outliers.PC.ZScore] = "red"
+labelCol[plot_data$Outliers.PC.ZScore] = "coral"
+labelCol[plot_data$Outliers.PC.ZScore & (plot_data$Outliers.Mahalanobis == "Yes")] = "red"
 
 label.size = 0.7
 title.size = 1.5
+
 hclust.euc.av <-  hclust.euc.av %>% as.dendrogram %>% hang.dendrogram %>%
-  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_colors",labelCol, order_value = TRUE) %>% 
+  set("leaves_col",labelCol, order_value = TRUE) %>% 
   set("labels_cex", label.size) 
+
 hclust.euc.comp <-  hclust.euc.comp %>% as.dendrogram %>% hang.dendrogram %>%
-  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_colors",labelCol, order_value = TRUE) %>% 
+  set("leaves_col",labelCol, order_value = TRUE) %>% 
   set("labels_cex", label.size) 
+
 hclust.euc.ward <-  hclust.euc.ward %>% as.dendrogram %>% hang.dendrogram %>%
-  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_colors",labelCol, order_value = TRUE) %>% 
+  set("leaves_col",labelCol, order_value = TRUE) %>% 
   set("labels_cex", label.size) 
+
 hclust.euc.sing <-  hclust.euc.sing %>% as.dendrogram %>% hang.dendrogram %>%
-  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_colors",labelCol, order_value = TRUE) %>% 
+  set("leaves_col",labelCol, order_value = TRUE) %>% 
   set("labels_cex", label.size)
+
 hclust.euc.cent <-  hclust.euc.cent %>% as.dendrogram %>% hang.dendrogram %>%
-  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_colors",labelCol, order_value = TRUE) %>% 
+  set("leaves_col",labelCol, order_value = TRUE) %>% 
   set("labels_cex", label.size)
+
 
 
 hclust.cor.av <-  hclust.cor.av %>% as.dendrogram %>% hang.dendrogram %>%
-  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_colors",labelCol, order_value = TRUE) %>% 
+  set("leaves_col",labelCol, order_value = TRUE) %>% 
   set("labels_cex", label.size) 
+
 hclust.cor.comp <-  hclust.cor.comp %>% as.dendrogram %>% hang.dendrogram %>%
-  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_colors",labelCol, order_value = TRUE) %>% 
+  set("leaves_col",labelCol, order_value = TRUE) %>% 
   set("labels_cex", label.size) 
+
 hclust.cor.ward <-  hclust.cor.ward %>% as.dendrogram %>% hang.dendrogram %>%
-  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_colors",labelCol, order_value = TRUE) %>% 
+  set("leaves_col",labelCol, order_value = TRUE) %>% 
   set("labels_cex", label.size) 
+
 hclust.cor.sing <-  hclust.cor.sing %>% as.dendrogram %>% hang.dendrogram %>%
-  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_colors",labelCol, order_value = TRUE) %>% 
+  set("leaves_col",labelCol, order_value = TRUE) %>% 
   set("labels_cex", label.size) 
+
 hclust.cor.cent <-  hclust.cor.cent %>% as.dendrogram %>% hang.dendrogram %>%
-  set("labels_colors",labelCol) %>% set("leaves_col",labelCol) %>% 
+  set("labels_colors",labelCol, order_value = TRUE) %>% 
+  set("leaves_col",labelCol, order_value = TRUE) %>% 
   set("labels_cex", label.size)
 
 pdf(file = paste0(OutPrefix , ".hClust.pdf"),width = 18,height = 30)
 par(mfrow=c(10,1), mar=c(2,3,2,1))
 plot(hclust.euc.av, main = "Euclidean distance, Average method", xlab = "", sub = "", cex.main = title.size)
 legend("topright",
-       legend = c("Mahalanobis", "PC Z-score"),
-       col = c("orange", "red"),
+       legend = c("Mahalanobis", "PC Z-score", "Both"),
+       col = c("orange", "pink", "red"),
        title = "Otliers",pch = c(16, 16))
 plot(hclust.euc.sing, main = "Euclidean distance, Single method", xlab = "", sub = "", cex.main = title.size)
 plot(hclust.euc.comp, main = "Euclidean distance, Complete method", xlab = "", sub = "", cex.main = title.size)
