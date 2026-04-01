@@ -118,7 +118,7 @@ for (k in 1:length(analysis.type)) {
   cat("Analysis based on ",analysis.type[k], "method...\n")
   
   result <- ModuleTrait(MEs = net$MEs , Pheno = pheno , method = analysis.type[k],Plot = T,plot.title = "Module Trait",
-                        return_melt = F,Trait = "Trait",Factor_Covars = covars_fact , Numeric_Covars = covars_num)
+                        return_melt = F,Trait = trait,Factor_Covars = covars_fact , Numeric_Covars = covars_num)
   
   cat("Saving results...\n")
   if(save_csv){

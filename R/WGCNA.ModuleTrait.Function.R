@@ -7,7 +7,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   #                 t-test for binary variables
   #                 anova test for categorical and numeric variables
   
-  suppressMessages(library(QuantPsyc))
+  ###suppressMessages(library(QuantPsyc))
   method <- match.arg(method,c("cor","lm","test"),several.ok = F)
   
   if( !(Trait %in% colnames(Pheno))){
