@@ -46,10 +46,8 @@ saveRDS(sft,file = paste0(out_prefix,".WGCNA.SoftPower.rds"))
 
 message("Generating plots...")
 
+pdf(file = paste0(out_prefix,".WGCNA.SoftPower.pdf"), width = 9, height = 5)
 
-pdf(file = paste0(out_prefix,".WGCNA.SoftPower.pdf"))
-
-sizeGrWindow(9, 5)
 par(mfrow = c(1,2))
 cex1 = 0.9
 

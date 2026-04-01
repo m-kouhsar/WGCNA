@@ -19,6 +19,7 @@ cat("    Output prefix:",OutPrefix,"\n")
 cat("\n")
 
 cat("Loading libraries...\n")
+library(stringr)
 suppressMessages(library(WGCNA))
 allowWGCNAThreads()
 options(stringsAsFactors = FALSE)
@@ -28,50 +29,50 @@ options(stringsAsFactors = FALSE)
 Save.TOM <- ifelse(trimws(tolower(Save.TOM))=="yes",T,F)
 Plot.Dendro <- ifelse(trimws(tolower(Plot.Dendro))=="yes",T,F)
 
-cat("Reading input data...")
+cat("Reading input data...\n")
 if(str_ends(string = Data.File , pattern = ".rds")){
   Data <- readRDS(Data.File)
 }else{
   Data <- read.table(file = Data.File, stringsAsFactors = F,header = T, row.names = 1,check.names=F)
 }
 
+wgcna_input = t(Data)
 message("goodSamplesGenes function in WGCNA:")
+gsg <- goodSamplesGenes(wgcna_input, verbose = 3)
 if (!gsg$allOK) {
   
   if (sum(!gsg$goodGenes) > 0) 
-    printFlush(paste("    Removing genes:", paste(colnames(wgcna_input)[!gsg$goodGenes], collapse = ", ")))
+    message(paste("    Removing genes:", paste(colnames(wgcna_input)[!gsg$goodGenes], collapse = ", ")))
   if (sum(!gsg$goodSamples) > 0) 
-    printFlush(paste("    Removing samples:", paste(rownames(wgcna_input)[!gsg$goodSamples], collapse = ", ")))
+    message(paste("    Removing samples:", paste(rownames(wgcna_input)[!gsg$goodSamples], collapse = ", ")))
   
   wgcna_input <- wgcna_input[gsg$goodSamples, gsg$goodGenes]
-  print("Bad samples/genes removed. Data is now ready for WGCNA.")
 } else {
-  print("    All OK! No samples or genes need to be removed.")
+  message("    All OK! No samples or genes need to be removed.")
 }
 
 
 cat("Generating network...\n")
 
 nthr = max(1, parallel::detectCores(), na.rm = TRUE)
-net = blockwiseModules(datExpr = t(Data), maxBlockSize = Block.Size, power = SoftPow, TOMType = "unsigned", 
+net = blockwiseModules(datExpr = wgcna_input, maxBlockSize = Block.Size, power = SoftPow, TOMType = "unsigned", 
                        minModuleSize = min.Module.Size, reassignThreshold = 0, mergeCutHeight = 0.25, 
-                       numericLabels = F, saveTOMs= Save.TOM, verbose = 3, nThreads = nthr)
+                       numericLabels = F, saveTOMs= Save.TOM,saveTOMFileBase=paste0(OutPrefix,".TOM"), verbose = 3, nThreads = nthr)
 
 cat("Saving the network object...\n")
 saveRDS(net,file = paste0(OutPrefix,".WGCNA.Net.rds"))
 
 if(Plot.Dendro){
   cat("Generating plots...\n")
-  sizeGrWindow(6,6)
-  pdf(paste0(OutPrefix,".WGCNA.Net.Dendrogram.pdf"))
+  pdf(paste0(OutPrefix,".WGCNA.Net.Dendrogram.pdf"),width = 6 , height = 6)
   for (i in 1:length(net$dendrograms)) {
     plotDendroAndColors(net$dendrograms[[i]], net$blockGenes[[i]],
                         "Module colors", main = "Gene dendrogram and module colors in block 1", 
                         dendroLabels = FALSE, hang = 0.03,
                         addGuide = TRUE, guideHang = 0.05)
   }
-  dev.off()
+  graphics.off()
 }
 
-print("All done!")
+message("All done!")
 
