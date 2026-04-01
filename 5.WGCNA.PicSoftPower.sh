@@ -18,6 +18,6 @@ out_prefix=./Results/Cohort1
 script_dir=./WGCNA
 #################################################################################
 
-Rscript "$script_dir"/R/5.WGCNA.PicSoftThresh.R "$data_file" "$block_size" "$out_prefix"
+Rscript "$script_dir"/R/5.WGCNA.PicSoftPower.R "$data_file" "$block_size" "$out_prefix"
 
 

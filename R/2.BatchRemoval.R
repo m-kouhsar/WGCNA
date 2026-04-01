@@ -76,6 +76,4 @@ if(str_ends(string = expr.file , pattern = ".rds")){
 }else{
   write.table(clean_expr_mat , file = paste0(out_prefix , ".noBatch.tsv") , row.names = T , col.names = T , sep = "\t" , quote = F)
 }
-
-cat("\n")
 cat("All done!\n")

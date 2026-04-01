@@ -4,18 +4,19 @@ Data.File <- trimws(args[1])
 block_size <- as.numeric(trimws(args[2]))
 out_prefix <- trimws(args[3])
 
-cat("Input arguments:\n")
-cat("    Methylation/Expression data file: ",Data.File,"\n")
-cat("    Block size: ",block_size,"\n")
-cat("    Output files prefix: ",out_prefix,"\n")
-cat("\n")
+message("Input arguments:")
+message("    Methylation/Expression data file: ",Data.File)
+message("    Block size: ",block_size)
+message("    Output files prefix: ",out_prefix)
+message("\n")
 
-cat("Loading libraries...\n")
+message("Loading libraries...")
+suppressMessages(library(stringr))
 suppressMessages(library(WGCNA))
 allowWGCNAThreads()
 options(stringsAsFactors = FALSE)
 
-cat("Reading input data...")
+message("Reading input data...")
 if(str_ends(string = Data.File , pattern = ".rds")){
   Data <- readRDS(Data.File)
 }else{
@@ -23,34 +24,34 @@ if(str_ends(string = Data.File , pattern = ".rds")){
 }
 
 wgcna_input = t(Data)
-gsg <- goodSamplesGenes(wgcna_input, verbose = 3)
-
 message("goodSamplesGenes function in WGCNA:")
+gsg <- goodSamplesGenes(wgcna_input, verbose = 3)
 if (!gsg$allOK) {
   
   if (sum(!gsg$goodGenes) > 0) 
-    printFlush(paste("    Removing genes:", paste(colnames(wgcna_input)[!gsg$goodGenes], collapse = ", ")))
+    message(paste("    Removing genes:", paste(colnames(wgcna_input)[!gsg$goodGenes], collapse = ", ")))
   if (sum(!gsg$goodSamples) > 0) 
-    printFlush(paste("    Removing samples:", paste(rownames(wgcna_input)[!gsg$goodSamples], collapse = ", ")))
+    message(paste("    Removing samples:", paste(rownames(wgcna_input)[!gsg$goodSamples], collapse = ", ")))
   
   wgcna_input <- wgcna_input[gsg$goodSamples, gsg$goodGenes]
-  print("Bad samples/genes removed. Data is now ready for WGCNA.")
+  
 } else {
-  print("    All OK! No samples or genes need to be removed.")
+  message("    All OK! No samples or genes need to be removed.")
 }
 
-cat("Calculating soft powers...\n")
+message("Calculating soft powers...")
 powers = c(c(1:10), seq(from = 12, to=20, by=2))
 sft = pickSoftThreshold(wgcna_input, powerVector = powers, verbose = 5, dataIsExpr = TRUE,blockSize = block_size)
 saveRDS(sft,file = paste0(out_prefix,".WGCNA.SoftPower.rds"))
 
-cat("Generating plots...\n")
+message("Generating plots...")
+
+
+pdf(file = paste0(out_prefix,".WGCNA.SoftPower.pdf"))
 
 sizeGrWindow(9, 5)
 par(mfrow = c(1,2))
 cex1 = 0.9
-
-pdf(file = paste0(out_prefix,".WGCNA.SoftPower.pdf"))
 
 plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
     xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",
@@ -64,7 +65,7 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],
     main = paste("Mean connectivity"))
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 
-dev.off()
+graphics.off()
 
-cat("All done!")
+message("All done!")
 

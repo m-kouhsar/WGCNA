@@ -10,12 +10,10 @@
 #SBATCH --mail-user=m.kouhsar@exeter.ac.uk # email address
 
 beta_file=./Methylation.rds
-meth_filter=yes     # set it to y/yes/T/true/1 if you need to filter the SNP,Sex and Cross Hybridising probes
 convert2M=yes       # set it to y/yes/T/true/1 if you need to convert Beta values to M values
-mad_thr=0.25
 out_prefix=./Results/Methylation.Cohort1
 
 ScriptDir=./WGCNS
 ##########################################################################
 
-Rscript "${ScriptDir}"/R/1.ProbeFiltering_Methylation.R "$beta_file" "$meth_filter" "$convert2M" "$mad_thr" "$out_prefix" "$ScriptDir"
+Rscript "${ScriptDir}"/R/1.ProbeFiltering_Methylation.R "$beta_file" "$convert2M" "$out_prefix" "$ScriptDir"

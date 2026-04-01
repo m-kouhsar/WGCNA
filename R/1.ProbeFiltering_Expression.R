@@ -25,7 +25,7 @@ suppressMessages(library(edgeR))
 
 ###############################################################################
 
-dir.create(path = dirname(out_prefix) , recursive = T , showWarnings = F)
+dir.create(path = dirname(OutPrefix) , recursive = T , showWarnings = F)
 cat("Reading expression data...\n")
 counts <- read.table(file = counts.file, stringsAsFactors = F,header = T, row.names = 1,check.names=F)
 pheno <- read.csv(pheno.file , row.names = 1 , stringsAsFactors = F)
@@ -61,7 +61,7 @@ if(normalize.method == "cpm"){
 }
 
 cat("Saving filtered data...\n")
-write.table(counts , file = paste0(out_prefix,".Filtered.rds") , row.names = T , col.names = T , sep = "\t" , quote = F)
+write.table(counts , file = paste0(OutPrefix,".Filtered.rds") , row.names = T , col.names = T , sep = "\t" , quote = F)
 
 cat("All done!")
 cat("\n")

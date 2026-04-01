@@ -3,7 +3,7 @@ args = commandArgs(T)
 
 expr_file <- trimws(args[1])  #Methylation matrix in rds format or expression matrix in tsv format
 pheno_file <- trimws(args[2])
-outliers <- trimws(str_split_1(trimws(args[3])))
+outliers <- trimws(args[3])
 out_prefix <- trimws(args[4])
 
 message("Input arguments:")
@@ -13,17 +13,18 @@ message("        Outlier samples: ", outliers)
 message("        Output files prefix: ", out_prefix)
 cat("\n")
 
+suppressMessages(library(stringr))
 ##################################################################################################
-dir.create(dirname(OutPrefix) , recursive = T , showWarnings = F)
-
+dir.create(dirname(out_prefix) , recursive = T , showWarnings = F)
+outliers <- trimws(str_split_1(outliers , pattern = ","))
 message("Reading the data ...")
-if(str_ends(string = expr.file , pattern = ".rds")){
-  expr_mat <- readRDS(expr.file)
+if(str_ends(string = expr_file , pattern = ".rds")){
+  expr_mat <- readRDS(expr_file)
 }else{
-  expr_mat <- read.table(file = counts.file, stringsAsFactors = F,header = T, row.names = 1,check.names=F)
+  expr_mat <- read.table(file = expr_file, stringsAsFactors = F,header = T, row.names = 1,check.names=F)
 }
 
-pheno <- read.csv(pheno.file , row.names = 1 , stringsAsFactors = F)
+pheno <- read.csv(pheno_file , row.names = 1 , stringsAsFactors = F)
 
 if(!identical(colnames(expr_mat) , rownames(pheno))){
   message("Warning message:\nColnames in the count matrix are not equal to the rownames in the phenotype file!\nShared names will be considered.")
@@ -50,11 +51,11 @@ if(all(outliers != "")){
 
 ####################################################################################
 message("Saving the results...")
-if(str_ends(string = expr.file , pattern = ".rds")){
+if(str_ends(string = expr_file , pattern = ".rds")){
   saveRDS(expr_mat, file = paste0(out_prefix,".noOutlr.rds"))
 }else{
   write.table(expr_mat , file = paste0(out_prefix , ".noOutlr.tsv") , row.names = T , col.names = T , sep = "\t" , quote = F)
 }
 
-
+write.csv(pheno , file = paste0(out_prefix , ".noOutlr.pheno.csv"))
 

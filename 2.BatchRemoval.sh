@@ -19,4 +19,4 @@ out_prefix=./Results/WGCNA/Immunisation.Mval.Filtered.MAD.25
 ScriptDir=./WGCNA
 #################################################################################################################
 
-Rscript "${ScriptDir}"/R/4.BatchRemoval.R "$expr_file" "$pheno_file" "$model_protect" "$model_remove" "$out_prefix"
+Rscript "${ScriptDir}"/R/2.BatchRemoval.R "$expr_file" "$pheno_file" "$model_protect" "$model_remove" "$out_prefix"

@@ -9,12 +9,11 @@
 #SBATCH --mail-type=END # send email at job completion
 #SBATCH --mail-user=m.kouhsar@exeter.ac.uk # email address
 
-expr_file=./Methylation.rds  #Methylation matrix in rds format or expression matrix in tsv format
-pheno_file=./phenotype.csv
-outliers=sample1,sample2,sample3
+beta_file=./Methylation.rds
+mad_thr=0.25
 out_prefix=./Results/Methylation.Cohort1
 
 ScriptDir=./WGCNS
 ##########################################################################
 
-Rscript "${ScriptDir}"/R/3.OutlierRemoval.R "$expr_file" "$pheno_file" "$outliers" "$out_prefix"
+Rscript "${ScriptDir}"/R/3.MADFiltering.R "$beta_file" "$mad_thr" "$out_prefix"
