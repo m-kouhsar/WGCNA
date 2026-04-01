@@ -52,9 +52,9 @@ expr_mat <- expr_mat[rownames(expr_mat) %in% rownames(as.data.frame(gene_mad1)),
 
 message("Saving filtered data...")
 if(str_ends(string = expr.file , pattern = ".rds")){
-  saveRDS(expr_mat, file = paste0(out_prefix,".MAD.",mad_thr,".rds"))
+  saveRDS(expr_mat, file = paste0(out_prefix,".MAD.",(mad_thr*100),".rds"))
 }else{
-  write.table(expr_mat , file = paste0(out_prefix,".MAD.",mad_thr,".tsv") , row.names = T , col.names = T , sep = "\t" , quote = F)
+  write.table(expr_mat , file = paste0(out_prefix,".MAD.",(mad_thr*100),".tsv") , row.names = T , col.names = T , sep = "\t" , quote = F)
 }
 message("All done!")
 
