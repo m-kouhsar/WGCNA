@@ -53,6 +53,7 @@ cat("Loading libraries...\n")
 suppressMessages(library(WGCNA))
 suppressMessages(library(stringr))
 suppressMessages(library(gridExtra))
+suppressMessages(library(stringr))
 suppressMessages(library(funr))
 
 source(paste0(dirname(sys.script()),"/WGCNA.ModuleTrait.Function.R"))
@@ -79,7 +80,12 @@ modules=str_split(modules,pattern = ',',simplify = T)[1,]
 analysis.type = str_split(tolower(analysis.type) , pattern = "," , simplify = T)[1,]
 
 pheno = read.csv(pheno.file,row.names = 1,stringsAsFactors = F)
-expr = readRDS(expr.file)
+if(str_ends(expr.file , pattern = ".rds")){
+  expr = readRDS(expr.file)
+}else{
+  expr = read.table(file = expr.file, stringsAsFactors = F,header = T, row.names = 1,check.names=F)
+}
+
 net = readRDS(net.file)
 
 if(!identical(names(net$colors),rownames(expr))){
