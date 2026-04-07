@@ -135,7 +135,7 @@ for (k in 1:length(analysis.type)) {
   }
   if(corr.plot){
     cat("Generating corrilation plot...\n")
-    pdf(file = paste0(out_pref,".ModuleTrait.",analysis.type[k],"CorPlot.pdf"), width = 10, height = 10)
+    pdf(file = paste0(out_pref,".ModuleTrait.",analysis.type[k],".CorPlot.pdf"), width = 10, height = 10)
     print(result$Plot)
     graphics.off()
   }
