@@ -10,7 +10,7 @@
 
 # calc_ME= "yes" or "no", Calculate Module Eigengene from expression matrix
 # corr.plot= "yes" or "no" , correlation plot between MEs and phenotype of interest
-# scatter.plot= "yes", "no" , Scatter plot for MEs and categorical variables
+# box.plot= "yes", "no" , Box plot with ANOVA,Tukay or T-test for MEs and categorical variables
 # save_csv = "yes" , or "no", Save the results in csv format
 
 #########################################################################################################
@@ -26,7 +26,7 @@ analysis.type = trimws(argument[7])
 calc_ME = trimws(argument[8])
 SoftPow = as.numeric(trimws(argument[9]))
 corr.plot= trimws(argument[10])
-scatter.plot = trimws(argument[11])
+box.plot = trimws(argument[11])
 save_csv= trimws(argument[12])
 out_pref = trimws(argument[13])
 
@@ -43,7 +43,7 @@ cat("     Analysis type = ",analysis.type,"\n")
 cat("     Do you want to calculate ME from expr/methyl matrix? ",calc_ME,"\n")
 cat("     Softthrshold power (For calculating ME) = ",SoftPow,"\n")
 cat("     Do you want to generate correlation plot? ",corr.plot,"\n")
-cat("     Do you want to generate scatter plot? ",scatter.plot,"\n")
+cat("     Do you want to generate scatter plot? ",box.plot,"\n")
 cat("     Do you want to save results in a csv file? ",save_csv,"\n")
 cat("\n")
 cat("Loading libraries...\n")
@@ -54,30 +54,98 @@ suppressMessages(library(gridExtra))
 suppressMessages(library(stringr))
 suppressMessages(library(funr))
 suppressMessages(library(ggpubr))
+suppressMessages(library(ggplot2))
+suppressMessages(library(rstatix))
 cat("\n")
 source(paste0(dirname(sys.script()),"/WGCNA.ModuleTrait.Function.R"))
 
-scatter.smooth.with.lm <- function(x, y, xlabel="",ylabel="", title=""){
-  library(ggplot2)
-  
-  data=cbind.data.frame(x,y)
-  
-  model <- lm(y ~ x, data = data)
-  pval  <- summary(model)$coefficients[2, 4]
-  pval_txt <- formatC(pval, format = "e", digits = 2)
-  
-    ggplot(data = data, aes(x, y)) + geom_point() +
-    geom_smooth(method = "lm", formula = y ~ x , se = T) + 
-      ggtitle(paste0(title , ", P-value = ",pval_txt))+xlab(xlabel)+ylab(ylabel)
-}
+################################################################################
+# scatter.smooth.with.lm <- function(x, y, xlabel="",ylabel="", title=""){
+#   
+#   data=cbind.data.frame(x,y)
+#   
+#   model <- lm(y ~ x, data = data)
+#   pval  <- summary(model)$coefficients[2, 4]
+#   pval_txt <- formatC(pval, format = "e", digits = 2)
+#   
+#     ggplot(data = data, aes(x, y)) + geom_point() +
+#     geom_smooth(method = "lm", formula = y ~ x , se = T) + 
+#       ggtitle(paste0(title , ", P-value = ",pval_txt))+xlab(xlabel)+ylab(ylabel)
+# }
 
-###############################################################
+plot_custom_boxplot <- function(factor_vec, numeric_vec, xlabel="",ylabel="", title="") {
+  
+  # 1. Validate and prep inputs
+  if (!is.numeric(numeric_vec)) stop("Error: The second argument must be a numeric vector.")
+  if (!is.factor(factor_vec)) factor_vec <- as.factor(factor_vec)
+  
+  factor_vec <- droplevels(factor_vec)
+  n_levels <- length(levels(factor_vec))
+  
+  if (n_levels < 2) stop("Error: The factor vector must have at least 2 levels.")
+  
+  # 2. Combine into a data frame
+  plot_data <- data.frame(
+    Category = factor_vec,
+    Value = numeric_vec
+  )
+  
+  # 3. Base Plot Setup
+  p <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
+    geom_boxplot(alpha = 0.7, outlier.color = "red", outlier.shape = 16) +
+    theme_minimal() +
+    labs(
+      title = title,
+      x = xlabel,
+      y = ylabel
+    )+
+    guides(fill=guide_legend(title=xlabel))
+  
+  # 4. Statistical Testing & Annotation Integration
+  if (n_levels == 2) {
+    # T-test for 2 levels
+    test_res <- plot_data %>% t_test(Value ~ Category) %>% add_xy_position(x = "Category")
+    test_res$label <- paste0("p = ", signif(test_res$p, 2))
+    
+    p <- p + stat_pvalue_manual(
+      test_res, 
+      label = "label", 
+      inherit.aes = FALSE,
+      tip.length = 0.01,
+      step.increase = 0.1,
+      hide.ns = FALSE
+    )
+    
+  } else {
+    # Tukey HSD for > 2 levels
+    # rstatix handles the formatting and y-position calculation automatically
+    tukey_res <- plot_data %>% 
+      tukey_hsd(Value ~ Category) %>% 
+      add_xy_position(x = "Category")
+    
+    # Create the exact label format matching your image (e.g., "p = 0.049")
+    tukey_res$label <- paste0("p = ", signif(tukey_res$p.adj, 2))
+    
+    # Add your suggested stat_pvalue_manual layer
+    p <- p + stat_pvalue_manual(
+      tukey_res, 
+      label = "label",            # Uses the formatted column we just created
+      inherit.aes = FALSE,
+      tip.length = 0.01,          # Shorten the bracket tips
+      step.increase = 0.1,        # Prevents brackets from overlapping
+      hide.ns = FALSE
+    )
+  }
+  
+  return(p)
+}
+################################################################################
 
 cat("Reading Inputs...\n")
 
 calc_ME = ifelse(tolower(calc_ME)=="yes",T,F)
 corr.plot= ifelse(tolower(corr.plot)=="yes",T,F)
-scatter.plot = ifelse(tolower(scatter.plot)=="yes",T,F)
+box.plot = ifelse(tolower(box.plot)=="yes",T,F)
 save_csv= ifelse(tolower(save_csv) =="yes",T,F)
 
 covars_fact=trimws(str_split_1(covars_fact,pattern = ','))
@@ -140,16 +208,16 @@ for (k in 1:length(analysis.type)) {
     graphics.off()
   }
   
-  if(scatter.plot){
-    cat("Generating scatter plots...\n")
+  if(box.plot){
+    cat("Generating box plots...\n")
     for (v in covars_fact) {
       p=list()
       for (i in 1:length(modules)) {
-        p[[modules[i]]] = scatter.smooth.with.lm(x = as.numeric(as.factor(pheno[,v])),y = net$MEs[,modules[i]],xlabel = v,ylabel = "ME",title = modules[i])
+        p[[modules[i]]] = plot_custom_boxplot(factor_vec = pheno[,v],numeric_vec = net$MEs[,modules[i]],xlabel = v,ylabel = "ME",title = modules[i])
       }
       
-      pdf(file = paste0(out_pref,"ModuleTrait.",analysis.type[k],".",v,".ScatPlot.pdf"), width = 10, height = 10)
-      grid.arrange(grobs=p)
+      pdf(file = paste0(out_pref,"ModuleTrait.",analysis.type[k],".",v,".BoxPlot.pdf"), width = 10, height = 10)
+      grid.arrange(grobs=p,ncol=2 , nrow = 2)
       graphics.off()
     }
 
