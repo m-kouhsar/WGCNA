@@ -216,9 +216,19 @@ for (k in 1:length(analysis.type)) {
         p[[modules[i]]] = plot_custom_boxplot(factor_vec = pheno[,v],numeric_vec = net$MEs[,modules[i]],xlabel = v,ylabel = "ME",title = modules[i])
       }
       
-      pdf(file = paste0(out_pref,"ModuleTrait.",analysis.type[k],".",v,".BoxPlot.pdf"), width = 10, height = 10)
-      grid.arrange(grobs=p,ncol=2 , nrow = 2)
-      graphics.off()
+      multipage_layout <- marrangeGrob(
+        grobs = p, 
+        nrow = 2, 
+        ncol = 2
+      )
+      
+      ggsave(
+        filename =  paste0(out_pref,"ModuleTrait.",analysis.type[k],".",v,".BoxPlot.pdf"), 
+        plot = multipage_layout, 
+        width = 10,
+        height = 8 
+      )
+      
     }
 
   }
