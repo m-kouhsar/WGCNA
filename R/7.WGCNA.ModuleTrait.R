@@ -43,7 +43,7 @@ cat("     Analysis type = ",analysis.type,"\n")
 cat("     Do you want to calculate ME from expr/methyl matrix? ",calc_ME,"\n")
 cat("     Softthrshold power (For calculating ME) = ",SoftPow,"\n")
 cat("     Do you want to generate correlation plot? ",corr.plot,"\n")
-cat("     Do you want to generate scatter plot? ",box.plot,"\n")
+cat("     Do you want to generate box plot? ",box.plot,"\n")
 cat("     Do you want to save results in a csv file? ",save_csv,"\n")
 cat("\n")
 cat("Loading libraries...\n")
@@ -209,6 +209,7 @@ for (k in 1:length(analysis.type)) {
   }
   
   if(box.plot){
+    pdf(NULL)
     cat("Generating box plots...\n")
     for (v in covars_fact) {
       p=list()
@@ -223,10 +224,10 @@ for (k in 1:length(analysis.type)) {
       )
       
       ggsave(
-        filename =  paste0(out_pref,"ModuleTrait.",analysis.type[k],".",v,".BoxPlot.pdf"), 
-        plot = multipage_layout, 
+        filename =  paste0(out_pref,"ModuleTrait.",analysis.type[k],".",v,".BoxPlot.pdf"),
+        plot = multipage_layout,
         width = 10,
-        height = 8 
+        height = 8
       )
       
     }
