@@ -1,8 +1,9 @@
-Module.Membership.Plot <- function(net.colors, expr.mat, trait,modules, size.threshold=NA,soft.power,plot.title=NA,selected.genes=NA){
+Module.Membership.Plot <- function(net.colors, expr.mat, trait,modules, size.threshold=NA,soft.power,plot.title="",selected.genes=NA){
   suppressMessages(library(WGCNA))
   suppressMessages(library(ggplot2))
   
   if(!identical(names(net.colors),rownames(expr.mat))){
+    warning("Genes/Probes in network colors and expression matrix are not identical. The intersection will be used.")
     index <- intersect(names(net.colors),rownames(expr.mat))
     net.colors <- net.colors[index]
     expr.mat <- expr.mat[index, ]

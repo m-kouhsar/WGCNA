@@ -224,7 +224,7 @@ for (k in 1:length(analysis.type)) {
       )
       
       ggsave(
-        filename =  paste0(out_pref,"ModuleTrait.",analysis.type[k],".",v,".BoxPlot.pdf"),
+        filename =  paste0(out_pref,".ModuleTrait.",analysis.type[k],".",v,".BoxPlot.pdf"),
         plot = multipage_layout,
         width = 10,
         height = 8
