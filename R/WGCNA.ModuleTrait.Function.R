@@ -1,5 +1,4 @@
-ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_melt=T, 
-                                    Trait , Factor_Covars, Numeric_Covars){
+ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_melt=T , Factor_Covars, Numeric_Covars){
   # method:
   #        "lm" -> Linear regression adjusted for all covariates
   #        "cor" -> Pearson correlation for numeric variables and Spearman correlation for categorical variables
@@ -10,9 +9,6 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   ###suppressMessages(library(QuantPsyc))
   method <- match.arg(method,c("cor","lm","test"),several.ok = F)
   
-  if( !(Trait %in% colnames(Pheno))){
-    stop("Trait variable ('", Trait,"') was not found in Pheno.")
-  }
   if( !all(Factor_Covars %in% colnames(Pheno))){
     stop("The following Factor variables were not found in Pheno:\n",setdiff(Factor_Covars , colnames(Pheno)))
   }
@@ -22,7 +18,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   if(nrow(MEs) != nrow(Pheno)){
     stop("MEs and Pheno dataframes must have the same number of rows")
   }
-  all_var <- c(Trait , Factor_Covars , Numeric_Covars)
+  all_var <- c(Factor_Covars , Numeric_Covars)
   cor_val <- matrix(data = NA, nrow = ncol(MEs), ncol = length(all_var))
   colnames(cor_val) <- all_var
   rownames(cor_val) <- names(MEs)
@@ -37,7 +33,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
       
       for (j in 1:length(all_var)) {
         
-        if(all_var[j] %in% c(Trait , Factor_Covars)){
+        if(all_var[j] %in% Factor_Covars){
           
           message("Spearman correlation test between ",colnames(MEs)[i] , " and ",all_var[j])
           res1<-cor.test(as.numeric(MEs[,i]),as.numeric(as.factor(Pheno[,all_var[j]])), method="spearman",exact = FALSE)
@@ -63,7 +59,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
       
       for (j in 1:length(all_var)) {
         
-        if(all_var[j] %in% c(Trait , Factor_Covars)){
+        if(all_var[j] %in% Factor_Covars){
           
           df <- cbind.data.frame(module=MEs[,i],variable=Pheno[,all_var[j]])
           df.split <- split(df,as.factor(df$variable),drop = T)

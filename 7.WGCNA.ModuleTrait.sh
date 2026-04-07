@@ -31,8 +31,7 @@
 net_file="./WGCNA.Net.rds"
 expr_file="./betas.rds"
 pheno_file="./pheno.csv"
-trait=Psychosis
-covars_fact=Sex,BraakStage,Plate
+covars_fact=Trait,Sex,BraakStage,Plate
 covars_num=Age,CellProportion
 modules=all
 analysis_type=cor
@@ -46,7 +45,7 @@ out_prefix="./results_moduleTrait"
 ScriptDir=./WGCNA
 #############################################################################################################################
 
-Rscript "${ScriptDir}"/R/7.WGCNA.ModuleTrait.R "$net_file" "$expr_file" "$pheno_file" "$trait" "$covars_fact" "$covars_num" "$modules" \
+Rscript "${ScriptDir}"/R/7.WGCNA.ModuleTrait.R "$net_file" "$expr_file" "$pheno_file" "$covars_fact" "$covars_num" "$modules" \
 									   "$analysis_type" "$calc_ME" "$SoftPow" "$corr_plot" "$scatter_plot" "$save_csv" "$out_prefix" 
 
 
