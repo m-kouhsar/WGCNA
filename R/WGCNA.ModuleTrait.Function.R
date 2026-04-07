@@ -143,7 +143,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
     cor_plot <- ggplot(data, aes(x = var2, y = var1, fill = cor_val)) +
       geom_tile(color = "black") +
       geom_text(aes(label = text), color = "black", size = 3) +
-      scale_fill_gradient2(low = "blue", mid = "white", high = "red",limits=c(-1,+1))+
+      scale_fill_gradient2(low = "blue", mid = "white", high = "red")+
       labs(x = "",y = "") +ggtitle(plot.title)+
       theme(legend.title = element_blank(), text = element_text(size = 20, color = "black"), plot.title = element_text(size = 14),
             legend.text = element_text(size = 12),axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
