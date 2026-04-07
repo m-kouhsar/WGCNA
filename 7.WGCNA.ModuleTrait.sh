@@ -22,7 +22,7 @@
 
 # calc_ME= "yes" or "no", Calculate Module Eigengene from expression matrix
 # corr.plot= "yes" or "no" , correlation plot between MEs and phenotype of interest
-# scatter.plot= "yes", "no" , Scatter plot for MEs and Trait variable
+# scatter.plot= "yes", "no" , Box plot with ANOVA,Tukay or T-test for MEs and categorical variables
 # save_csv = "yes" , or "no", Save the results in csv format
 
 #########################################################################################################
@@ -38,7 +38,7 @@ analysis_type=cor
 calc_ME=no
 SoftPow=3
 corr_plot=no
-scatter_plot=no
+box_plot=no
 save_csv=yes
 out_prefix="./results_moduleTrait"
 
@@ -46,7 +46,7 @@ ScriptDir=./WGCNA
 #############################################################################################################################
 
 Rscript "${ScriptDir}"/R/7.WGCNA.ModuleTrait.R "$net_file" "$expr_file" "$pheno_file" "$covars_fact" "$covars_num" "$modules" \
-									   "$analysis_type" "$calc_ME" "$SoftPow" "$corr_plot" "$scatter_plot" "$save_csv" "$out_prefix" 
+									   "$analysis_type" "$calc_ME" "$SoftPow" "$corr_plot" "$box_plot" "$save_csv" "$out_prefix" 
 
 
 
