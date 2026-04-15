@@ -28,8 +28,8 @@ betas <- readRDS(file=beta_file)
 
 message("Total number of probes:",dim(betas)[1],"\nTotal number of samples:",dim(betas)[2])
 
-message("Reading Cross Hydridising Probes data..")
-crosslist<-read.table(paste0(ScriptDir , "/References/CrossHydridisingProbes_McCartney.txt"), stringsAsFactors = FALSE)[,1]
+message("Reading Cross Hybridising Probes data..")
+crosslist<-read.table(paste0(ScriptDir , "/References/CrossHybridisingProbes_McCartney.txt"), stringsAsFactors = FALSE)[,1]
 
 message("Reading SNP Probes data..")
 snpProbes<-read.table(paste0(ScriptDir , "/References/SNPProbes_McCartney.txt"), stringsAsFactors = FALSE, header = TRUE)
