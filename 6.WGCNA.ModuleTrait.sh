@@ -45,7 +45,7 @@ out_prefix="./results_moduleTrait"
 ScriptDir=./WGCNA
 #############################################################################################################################
 
-Rscript "${ScriptDir}"/R/7.WGCNA.ModuleTrait.R "$net_file" "$expr_file" "$pheno_file" "$covars_fact" "$covars_num" "$modules" \
+Rscript "${ScriptDir}"/R/6.WGCNA.ModuleTrait.R "$net_file" "$expr_file" "$pheno_file" "$covars_fact" "$covars_num" "$modules" \
 									   "$analysis_type" "$calc_ME" "$SoftPow" "$corr_plot" "$box_plot" "$save_csv" "$out_prefix" 
 
 

@@ -21,5 +21,5 @@ OutPrefix=./Results/Cohort1
 ScriptDir=./WGCNA
 ###############################################################################################################################
 
-Rscript "${ScriptDir}"/R/6.WGCNA.BlockwiseNet.R "$Data_File" "$SoftPow" "$Block_Size" "$min_Module_Size" "$Save_TOM" "$Plot_Dendro" "$OutPrefix"
+Rscript "${ScriptDir}"/R/5.WGCNA.BlockwiseNet.R "$Data_File" "$SoftPow" "$Block_Size" "$min_Module_Size" "$Save_TOM" "$Plot_Dendro" "$OutPrefix"
 

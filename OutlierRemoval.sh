@@ -17,4 +17,4 @@ out_prefix=./Results/Methylation.Cohort1
 ScriptDir=./WGCNS
 ##########################################################################
 
-Rscript "${ScriptDir}"/R/4.OutlierRemoval.R "$expr_file" "$pheno_file" "$outliers" "$out_prefix"
+Rscript "${ScriptDir}"/R/OutlierRemoval.R "$expr_file" "$pheno_file" "$outliers" "$out_prefix"
