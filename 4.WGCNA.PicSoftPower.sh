@@ -8,6 +8,7 @@
 #SBATCH --ntasks-per-node=16 # specify number of processors.
 #SBATCH --mail-type=END # send email at job completion
 #SBATCH --mail-user=m.kouhsar@exeter.ac.uk # email address
+#SBATCH --output=WGCNA.PicSoftPower.%j.out
 
 
 data_file=./Methylation.rds #Methylation data in rds format or Expression data in tsv format

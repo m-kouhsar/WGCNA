@@ -51,12 +51,19 @@ counts <- counts[keep,]
 
 if(normalize.method == "cpm"){
   message("Normalizing gene counts uisng cpm function in edgeR...")
-  counts <- edgeR::cpm(counts , log = TRUE)
+  dge <- edgeR::DGEList(counts = counts)
+  dge <- edgeR::calcNormFactors(dge)
+  counts <- edgeR::cpm(dge , log = TRUE)
   
 }else{
   if(normalize.method == "vst"){
     message("Normalizing gene counts uisng vst method in DESeq2...")
-    counts <- DESeq2::varianceStabilizingTransformation(as.matrix(counts) , blind = T, fitType = "parametric")
+    dds <- DESeqDataSetFromMatrix(countData = counts , 
+                                  colData = data.frame(row.names = colnames(counts), group = rep(1, ncol(counts))),
+                                  design = ~1)
+    dds <- estimateSizeFactors(dds)
+    dds_vst <- DESeq2::vst(dds , blind = T)
+    counts <- SummarizedExperiment::assay(dds_vst)
   }
 }
 

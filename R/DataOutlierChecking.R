@@ -58,9 +58,19 @@ var.num <- trimws(str_split_1(var.num , pattern = ","))
 
 pheno <- pheno[,c(var.fact,var.num)]
 
+rm_indx <- rep(TRUE ,length(var.fact))
+
 for (i in 1:length(var.fact)) {
+  
   pheno[,var.fact[i]] <- as.factor(pheno[,var.fact[i]])
+  
+  if(length(levels(pheno[,var.fact[i]])) < 2){
+    warning(var.fact[i] , " has only one value (",pheno[1,var.fact[i]],"). It will remove from the checking process." )
+    rm_indx[i] = FALSE
+  }
 }
+var.fact <- var.fact[rm_indx]
+
 for (i in 1:length(var.num)) {
   pheno[,var.num[i]] <- as.numeric(pheno[,var.num[i]])
 }
