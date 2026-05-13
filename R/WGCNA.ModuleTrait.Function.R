@@ -18,6 +18,15 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   if(nrow(MEs) != nrow(Pheno)){
     stop("MEs and Pheno dataframes must have the same number of rows")
   }
+  
+  for (v in Factor_Covars) {
+    Pheno[,v] <- as.factor(Pheno[,v])
+  }
+  
+  for (v in Numeric_Covars) {
+    Pheno[,v] <- as.numeric(Pheno[,v])
+  }
+  
   all_var <- c(Factor_Covars , Numeric_Covars)
   cor_val <- matrix(data = NA, nrow = ncol(MEs), ncol = length(all_var))
   colnames(cor_val) <- all_var
@@ -36,13 +45,13 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
         if(all_var[j] %in% Factor_Covars){
           
           message("Spearman correlation test between ",colnames(MEs)[i] , " and ",all_var[j])
-          res1<-cor.test(as.numeric(MEs[,i]),as.numeric(as.factor(Pheno[,all_var[j]])), method="spearman",exact = FALSE)
+          res1<-cor.test(as.numeric(MEs[,i]),as.numeric(Pheno[,all_var[j]]), method="spearman",exact = FALSE)
           cor_val[i,j]<-res1$estimate
           cor_p[i,j]<-res1$p.value
           
         }else{
           message("Pearson correlation test between ",colnames(MEs)[i] , " and ",all_var[j])
-          res1<-cor.test(as.numeric(MEs[,i]),as.numeric(Pheno[,all_var[j]]), method="pearson",exact = FALSE)
+          res1<-cor.test(as.numeric(MEs[,i]),Pheno[,all_var[j]], method="pearson",exact = FALSE)
           cor_val[i,j]<-res1$estimate
           cor_p[i,j]<-res1$p.value
         }
@@ -62,7 +71,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
         if(all_var[j] %in% Factor_Covars){
           
           df <- cbind.data.frame(module=MEs[,i],variable=Pheno[,all_var[j]])
-          df.split <- split(df,as.factor(df$variable),drop = T)
+          df.split <- split(df,df$variable,drop = T)
           
           if(length(df.split) == 2){
             
@@ -88,7 +97,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
           message("Pearson correlation test between ",colnames(MEs)[i] , " and ",all_var[j])
           col.type[j] = "Corr"
           
-          res1<-cor.test(as.numeric(MEs[,i]),as.numeric(Pheno[,all_var[j]]), method="pearson",exact = FALSE)
+          res1<-cor.test(as.numeric(MEs[,i]),Pheno[,all_var[j]], method="pearson",exact = FALSE)
           cor_val[i,j]<-res1$estimate
           cor_p[i,j]<-res1$p.value
         }
