@@ -22,6 +22,7 @@ suppressMessages(library(WGCNA))
 allowWGCNAThreads()
 options(stringsAsFactors = FALSE)
 suppressMessages(library(edgeR))
+suppressMessages(library(DESeq2))
 
 ###############################################################################
 
@@ -58,10 +59,10 @@ if(normalize.method == "cpm"){
 }else{
   if(normalize.method == "vst"){
     message("Normalizing gene counts uisng vst method in DESeq2...")
-    dds <- DESeqDataSetFromMatrix(countData = counts , 
+    dds <- DESeq2::DESeqDataSetFromMatrix(countData = counts , 
                                   colData = data.frame(row.names = colnames(counts), group = rep(1, ncol(counts))),
                                   design = ~1)
-    dds <- estimateSizeFactors(dds)
+    dds <- DESeq2::estimateSizeFactors(dds)
     dds_vst <- DESeq2::vst(dds , blind = T)
     counts <- SummarizedExperiment::assay(dds_vst)
   }
