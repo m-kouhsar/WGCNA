@@ -17,10 +17,11 @@ Block_Size=30000
 min_Module_Size=100
 Save_TOM=No
 Plot_Dendro=No
+Numeric_Labels=Yes
 OutPrefix=./Results/Cohort1
 
 ScriptDir=./WGCNA
 ###############################################################################################################################
 
-Rscript "${ScriptDir}"/R/5.WGCNA.BlockwiseNet.R "$Data_File" "$SoftPow" "$Block_Size" "$min_Module_Size" "$Save_TOM" "$Plot_Dendro" "$OutPrefix"
+Rscript "${ScriptDir}"/R/5.WGCNA.BlockwiseNet.R "$Data_File" "$SoftPow" "$Block_Size" "$min_Module_Size" "$Save_TOM" "$Plot_Dendro" "$Numeric_Labels" "$OutPrefix"
 

@@ -6,7 +6,16 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   #                 t-test for binary variables
   #                 anova test for categorical and numeric variables
   
-  ###suppressMessages(library(QuantPsyc))
+  suppressMessages(library(reshape2))
+  suppressWarnings(library(ggplot2))
+  suppressWarnings(library(stringr))
+  
+  if(plot.title==""){
+    plot.title="Module-Trait relationship"
+  }
+  plot.subtitle=""
+  plot.legend=""
+  
   method <- match.arg(method,c("cor","lm","test"),several.ok = F)
   
   if( !all(Factor_Covars %in% colnames(Pheno))){
@@ -36,6 +45,8 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   
   if(method=="cor"){
     
+    plot.subtitle = "Spearman correlation for categorical variaales and Pearson correlation for numeric variables."
+    plot.legend = "Correlation"
     colnames(cor_val) <- paste0(colnames(cor_val),".Corr")
     
     for(i in 1:ncol(MEs)){
@@ -61,6 +72,9 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   
   # https://stackoverflow.com/questions/52811684/running-a-two-sample-t-test-with-unequal-sample-size-in-r
   if(method=="test"){
+    
+    plot.subtitle = "T-test and ANOVA test for categorical variables and Pearson correlation for numeric variables."
+    plot.legend = "Correlation/Statistic"
     
     col.type <- vector(length = ncol(cor_val) , mode = "character")
     
@@ -109,6 +123,9 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   
   if(method=="lm"){
     
+    plot.subtitle = "Linear regression analysis using ME~Var1+var2+var3+... model."
+    plot.legend = "Estimate"
+    
     cor_val <- vector(length = ncol(MEs) , mode = "list")
     cor_p <- vector(length = ncol(MEs) , mode = "list")
     names(cor_p) = names(cor_val) <- colnames(MEs)
@@ -135,11 +152,10 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
     colnames(cor_val) = colnames(cor_p) = names(lm_summary$coefficients[-1,1])
     rownames(cor_val) = rownames(cor_p) = colnames(MEs)
   }
-  suppressMessages(library(reshape2))
-  suppressWarnings(library(ggplot2))
   
   data <- cbind.data.frame(melt(cor_val),melt(cor_p)[,3])
   names(data) <- c("var1", "var2","cor_val","cor_p")
+  data$var2 <- str_remove(data$var2 , pattern = "\\.[^.]*$")
   if(Plot){
     #x_lab =names(Pheno)
     textMatrix = paste(signif(cor_val, 3), "\n(",
@@ -152,10 +168,11 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
     cor_plot <- ggplot(data, aes(x = var2, y = var1, fill = cor_val)) +
       geom_tile(color = "black") +
       geom_text(aes(label = text), color = "black", size = 3) +
-      scale_fill_gradient2(low = "blue", mid = "white", high = "red")+
-      labs(x = "",y = "") +ggtitle(plot.title)+
+      scale_fill_gradient2(low = "blue", mid = "white", high = "red",name = plot.legend)+
+      labs(x = "",y = "") +labs(title = plot.title,subtitle = plot.subtitle)+
       theme(legend.title = element_blank(), text = element_text(size = 20, color = "black"), plot.title = element_text(size = 14),
-            legend.text = element_text(size = 12),axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
+            plot.subtitle = element_text(size = 12),legend.text = element_text(size = 12),
+            axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
   }
   if(return_melt){
     return(list(Result=data[,1:4],Plot = cor_plot))

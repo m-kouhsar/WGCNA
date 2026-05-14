@@ -60,19 +60,6 @@ cat("\n")
 source(paste0(dirname(sys.script()),"/WGCNA.ModuleTrait.Function.R"))
 
 ################################################################################
-# scatter.smooth.with.lm <- function(x, y, xlabel="",ylabel="", title=""){
-#   
-#   data=cbind.data.frame(x,y)
-#   
-#   model <- lm(y ~ x, data = data)
-#   pval  <- summary(model)$coefficients[2, 4]
-#   pval_txt <- formatC(pval, format = "e", digits = 2)
-#   
-#     ggplot(data = data, aes(x, y)) + geom_point() +
-#     geom_smooth(method = "lm", formula = y ~ x , se = T) + 
-#       ggtitle(paste0(title , ", P-value = ",pval_txt))+xlab(xlabel)+ylab(ylabel)
-# }
-
 plot_custom_boxplot <- function(factor_vec, numeric_vec, xlabel="",ylabel="", title="") {
   
   # 1. Validate and prep inputs
@@ -191,7 +178,7 @@ for (k in 1:length(analysis.type)) {
   
   cat("Analysis based on ",analysis.type[k], "method...\n")
   
-  result <- ModuleTrait(MEs = net$MEs[,modules , drop = F] , Pheno = pheno , method = analysis.type[k],Plot = T,plot.title = "Module Trait",
+  result <- ModuleTrait(MEs = net$MEs[,modules , drop = F] , Pheno = pheno , method = analysis.type[k],Plot = T,
                         return_melt = F, Factor_Covars = covars_fact , Numeric_Covars = covars_num)
   
   if(save_csv){
@@ -203,7 +190,7 @@ for (k in 1:length(analysis.type)) {
   }
   if(corr.plot){
     cat("Generating corrilation plot...\n")
-    pdf(file = paste0(out_pref,".ModuleTrait.",analysis.type[k],".CorPlot.pdf"), width = 12, height = 18)
+    pdf(file = paste0(out_pref,".ModuleTrait.",analysis.type[k],".HeatMap.pdf"), width = 20, height = 20)
     print(result$Plot)
     graphics.off()
   }

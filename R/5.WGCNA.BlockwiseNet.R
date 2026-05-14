@@ -6,7 +6,8 @@ Block.Size <- as.numeric(args[3])
 min.Module.Size <- as.numeric(args[4])
 Save.TOM <- args[5]
 Plot.Dendro <- args[6]
-OutPrefix <- args[7]
+Numeric.Labels <- args[7]
+OutPrefix <- args[8]
 
 cat("Input arguments:\n")
 cat("    Input data file:",Data.File,"\n")
@@ -28,6 +29,7 @@ options(stringsAsFactors = FALSE)
 
 Save.TOM <- ifelse(trimws(tolower(Save.TOM))=="yes",T,F)
 Plot.Dendro <- ifelse(trimws(tolower(Plot.Dendro))=="yes",T,F)
+Numeric.Labels <- ifelse(trimws(tolower(Numeric.Labels))=="yes",T,F)
 
 cat("Reading input data...\n")
 if(str_ends(string = Data.File , pattern = ".rds")){
@@ -57,7 +59,11 @@ cat("Generating network...\n")
 nthr = max(1, parallel::detectCores(), na.rm = TRUE)
 net = blockwiseModules(datExpr = wgcna_input, maxBlockSize = Block.Size, power = SoftPow, TOMType = "unsigned", 
                        minModuleSize = min.Module.Size, reassignThreshold = 0, mergeCutHeight = 0.25, 
-                       numericLabels = F, saveTOMs= Save.TOM,saveTOMFileBase=paste0(OutPrefix,".TOM"), verbose = 3, nThreads = nthr)
+                       numericLabels = Numeric.Labels, saveTOMs= Save.TOM,saveTOMFileBase=paste0(OutPrefix,".TOM"), verbose = 3, nThreads = nthr)
+
+if(Numeric.Labels){
+  net$colors <- paste0("module", net$colors)
+}
 
 cat("Saving the network object...\n")
 saveRDS(net,file = paste0(OutPrefix,".WGCNA.Net.rds"))
