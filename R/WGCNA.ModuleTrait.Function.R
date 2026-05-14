@@ -74,7 +74,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   if(method=="test"){
     
     plot.subtitle = "T-test and ANOVA test for categorical variables and Pearson correlation for numeric variables."
-    plot.legend = "Correlation/Statistic"
+    plot.legend = "Correlation/\nStatistic"
     
     col.type <- vector(length = ncol(cor_val) , mode = "character")
     
@@ -168,10 +168,13 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
     cor_plot <- ggplot(data, aes(x = var2, y = var1, fill = cor_val)) +
       geom_tile(color = "black") +
       geom_text(aes(label = text), color = "black", size = 3) +
-      scale_fill_gradient2(low = "blue", mid = "white", high = "red",name = plot.legend)+
-      labs(x = "",y = "") +labs(title = plot.title,subtitle = plot.subtitle)+
-      theme(legend.title = element_blank(), text = element_text(size = 20, color = "black"), plot.title = element_text(size = 14),
-            plot.subtitle = element_text(size = 12),legend.text = element_text(size = 12),
+      scale_fill_gradient2(low = "blue", mid = "white", high = "red")+
+      labs(x = "",y = "",title = plot.title,subtitle = plot.subtitle,fill = plot.legend)+
+      theme(text = element_text(size = 20, color = "black"), 
+            plot.title = element_text(size = 14),
+            plot.subtitle = element_text(size = 12),
+            legend.text = element_text(size = 12),
+            legend.title = element_text(size = 12),
             axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
   }
   if(return_melt){
