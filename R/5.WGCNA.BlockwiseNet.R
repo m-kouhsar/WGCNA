@@ -16,6 +16,7 @@ cat("    Maximum block size:",Block.Size,"\n")
 cat("    Minimum module size:",min.Module.Size,"\n")
 cat("    Do you want to save TOM data?",Save.TOM,"\n")
 cat("    Do you want to generate dendrogram for each block?",Plot.Dendro,"\n")
+cat("    Using numeric module names?",Numeric.Labels,"\n")
 cat("    Output prefix:",OutPrefix,"\n")
 cat("\n")
 
@@ -62,7 +63,9 @@ net = blockwiseModules(datExpr = wgcna_input, maxBlockSize = Block.Size, power =
                        numericLabels = Numeric.Labels, saveTOMs= Save.TOM,saveTOMFileBase=paste0(OutPrefix,".TOM"), verbose = 3, nThreads = nthr)
 
 if(Numeric.Labels){
-  net$colors <- paste0("module", net$colors)
+  net$colors <- setNames(paste0("module", net$colors), names(net$colors))
+  net$unmergedColors <- setNames(paste0("module", net$unmergedColors), names(net$unmergedColors))
+  colnames(net$MEs) <- paste0("MEmodule" , str_remove(colnames(net$MEs) , pattern="ME"))
 }
 
 cat("Saving the network object...\n")

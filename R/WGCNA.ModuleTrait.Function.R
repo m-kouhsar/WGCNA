@@ -1,3 +1,71 @@
+plot_custom_boxplot <- function(factor_vec, numeric_vec, xlabel="",ylabel="", title="") {
+  
+  # 1. Validate and prep inputs
+  if (!is.numeric(numeric_vec)) stop("Error: The second argument must be a numeric vector.")
+  if (!is.factor(factor_vec)) factor_vec <- as.factor(factor_vec)
+  
+  factor_vec <- droplevels(factor_vec)
+  n_levels <- length(levels(factor_vec))
+  
+  if (n_levels < 2) stop("Error: The factor vector must have at least 2 levels.")
+  
+  # 2. Combine into a data frame
+  plot_data <- data.frame(
+    Category = factor_vec,
+    Value = numeric_vec
+  )
+  
+  # 3. Base Plot Setup
+  p <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
+    geom_boxplot(alpha = 0.7, outlier.color = "red", outlier.shape = 16) +
+    theme_minimal() +
+    labs(
+      title = title,
+      x = xlabel,
+      y = ylabel
+    )+
+    guides(fill=guide_legend(title=xlabel))
+  
+  # 4. Statistical Testing & Annotation Integration
+  if (n_levels == 2) {
+    # T-test for 2 levels
+    test_res <- plot_data %>% t_test(Value ~ Category) %>% add_xy_position(x = "Category")
+    test_res$label <- paste0("p = ", signif(test_res$p, 2))
+    
+    p <- p + stat_pvalue_manual(
+      test_res, 
+      label = "label", 
+      inherit.aes = FALSE,
+      tip.length = 0.01,
+      step.increase = 0.1,
+      hide.ns = FALSE
+    )
+    
+  } else {
+    # Tukey HSD for > 2 levels
+    # rstatix handles the formatting and y-position calculation automatically
+    tukey_res <- plot_data %>% 
+      tukey_hsd(Value ~ Category) %>% 
+      add_xy_position(x = "Category")
+    
+    # Create the exact label format matching your image (e.g., "p = 0.049")
+    tukey_res$label <- paste0("p = ", signif(tukey_res$p.adj, 2))
+    
+    # Add your suggested stat_pvalue_manual layer
+    p <- p + stat_pvalue_manual(
+      tukey_res, 
+      label = "label",            # Uses the formatted column we just created
+      inherit.aes = FALSE,
+      tip.length = 0.01,          # Shorten the bracket tips
+      step.increase = 0.1,        # Prevents brackets from overlapping
+      hide.ns = FALSE
+    )
+  }
+  
+  return(p)
+}
+
+#############################################################################################################################
 ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_melt=T , Factor_Covars, Numeric_Covars){
   # method:
   #        "lm" -> Linear regression adjusted for all covariates
