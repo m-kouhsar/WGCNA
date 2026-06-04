@@ -9,7 +9,7 @@
 #                 anova test for categorical and numeric variables
 
 # calc_ME= "yes" or "no", Calculate Module Eigengene from expression matrix
-# corr.plot= "yes" or "no" , correlation plot between MEs and phenotype of interest
+# heatmap= "yes" or "no" , Heatmap between MEs and phenotype of interest
 # box.plot= "yes", "no" , Box plot with ANOVA,Tukay or T-test for MEs and categorical variables
 # save_csv = "yes" , or "no", Save the results in csv format
 
@@ -25,7 +25,7 @@ modules = trimws(argument[6])
 analysis.type = trimws(argument[7])
 calc_ME = trimws(argument[8])
 SoftPow = as.numeric(trimws(argument[9]))
-corr.plot= trimws(argument[10])
+heatmap= trimws(argument[10])
 box.plot = trimws(argument[11])
 save_csv= trimws(argument[12])
 out_pref = trimws(argument[13])
@@ -42,7 +42,7 @@ cat("     Modules = ",modules,"\n")
 cat("     Analysis type = ",analysis.type,"\n")
 cat("     Do you want to calculate ME from expr/methyl matrix? ",calc_ME,"\n")
 cat("     Softthrshold power (For calculating ME) = ",SoftPow,"\n")
-cat("     Do you want to generate correlation plot? ",corr.plot,"\n")
+cat("     Do you want to generate correlation plot? ",heatmap,"\n")
 cat("     Do you want to generate box plot? ",box.plot,"\n")
 cat("     Do you want to save results in a csv file? ",save_csv,"\n")
 cat("\n")
@@ -64,7 +64,7 @@ source(paste0(dirname(sys.script()),"/WGCNA.ModuleTrait.Function.R"))
 cat("Reading Inputs...\n")
 
 calc_ME = ifelse(tolower(calc_ME)=="yes",T,F)
-corr.plot= ifelse(tolower(corr.plot)=="yes",T,F)
+heatmap= ifelse(tolower(heatmap)=="yes",T,F)
 box.plot = ifelse(tolower(box.plot)=="yes",T,F)
 save_csv= ifelse(tolower(save_csv) =="yes",T,F)
 
@@ -121,7 +121,7 @@ for (k in 1:length(analysis.type)) {
     result$Result$ModuleSize <- modules.size$Freq[index]
     write.csv(result$Result , file=paste0(out_pref,".ModuleTrait.",analysis.type[k],".csv"))
   }
-  if(corr.plot){
+  if(heatmap){
     cat("Generating corrilation plot...\n")
     pdf(file = paste0(out_pref,".ModuleTrait.",analysis.type[k],".HeatMap.pdf"), 
         width = length(c(covars_num,covars_fact))*0.4+5, height = length(modules)*0.4+5)

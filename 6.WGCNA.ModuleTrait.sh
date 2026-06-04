@@ -21,8 +21,8 @@
 #                 anova test for categorical and numeric variables
 
 # calc_ME= "yes" or "no", Calculate Module Eigengene from expression matrix
-# corr.plot= "yes" or "no" , correlation plot between MEs and phenotype of interest
-# scatter.plot= "yes", "no" , Box plot with ANOVA,Tukay or T-test for MEs and categorical variables
+# heatmap= "yes" or "no" , correlation plot between MEs and phenotype of interest
+# box_plot= "yes", "no" , Box plot with ANOVA,Tukay or T-test for MEs and categorical variables
 # save_csv = "yes" , or "no", Save the results in csv format
 
 #########################################################################################################
@@ -37,7 +37,7 @@ modules=all
 analysis_type=cor
 calc_ME=no
 SoftPow=3
-corr_plot=no
+heatmap=no
 box_plot=no
 save_csv=yes
 out_prefix="./results_moduleTrait"
