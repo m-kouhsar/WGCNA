@@ -113,7 +113,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   
   if(method=="cor"){
     
-    plot.subtitle = "Spearman correlation for categorical variaales and Pearson correlation for numeric variables."
+    plot.subtitle = "Spearman correlation for categorical variaales \nand Pearson correlation for numeric variables."
     plot.legend = "Correlation"
     colnames(cor_val) <- paste0(colnames(cor_val),".Corr")
     
@@ -141,7 +141,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   # https://stackoverflow.com/questions/52811684/running-a-two-sample-t-test-with-unequal-sample-size-in-r
   if(method=="test"){
     
-    plot.subtitle = "T-test and ANOVA test for categorical variables and Pearson correlation for numeric variables."
+    plot.subtitle = "T-test and ANOVA test for categorical variables \nand Pearson correlation for numeric variables."
     plot.legend = "Correlation/\nStatistic"
     
     col.type <- vector(length = ncol(cor_val) , mode = "character")
@@ -191,7 +191,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   
   if(method=="lm"){
     
-    plot.subtitle = "Linear regression analysis using ME~Var1+var2+var3+... model."
+    plot.subtitle = "Linear regression analysis \nusing ME~Var1+var2+var3+... model."
     plot.legend = "Estimate"
     
     cor_val <- vector(length = ncol(MEs) , mode = "list")
