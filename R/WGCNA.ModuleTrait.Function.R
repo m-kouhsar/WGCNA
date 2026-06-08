@@ -248,8 +248,12 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   if(return_melt){
     return(list(Result=data[,1:4],Plot = cor_plot))
   }else{
+    cor_fdr <- apply(cor_p, 2, function(x){
+      return(p.adjust(x,method = "fdr"))
+    })
     colnames(cor_p) = paste0(colnames(cor_p) , ".Pval")
-    data <- cbind.data.frame(cor_val, cor_p)
+    colnames(cor_fdr) = paste0(colnames(cor_fdr) , ".FDR")
+    data <- cbind.data.frame(cor_val, cor_p,cor_fdr)
     return(list(Result=data,Plot=cor_plot))
   }
   
