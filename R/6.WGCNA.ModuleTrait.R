@@ -109,6 +109,7 @@ colnames(net$MEs) <- str_remove(colnames(net$MEs),pattern = "ME")
 
 for (k in 1:length(analysis.type)) {
   
+  cat("\n")
   cat("Analysis based on ",analysis.type[k], "method...\n")
   
   result <- ModuleTrait(MEs = net$MEs[,modules , drop = F] , Pheno = pheno , method = analysis.type[k],Plot = T,

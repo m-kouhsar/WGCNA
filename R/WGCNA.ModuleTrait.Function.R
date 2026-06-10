@@ -111,29 +111,39 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
   cor_p <- cor_val
   cor_plot <- NA
   
+  message("Total number of modules: ",ncol(MEs))
+  message("Total number of variables: ",length(all_var))
+  
   if(method=="cor"){
     
     plot.subtitle = "Spearman correlation for categorical variaales \nand Pearson correlation for numeric variables."
     plot.legend = "Correlation"
     colnames(cor_val) <- paste0(colnames(cor_val),".Corr")
     
+    k <- 0
+    message("Total number of test: ",ncol(MEs)," * ",length(all_var)," = ",(ncol(MEs)*length(all_var)))
+    message("")
     for(i in 1:ncol(MEs)){
       
       for (j in 1:length(all_var)) {
+        k <- k+1
+        message("Analysis result ",k,"/",(ncol(MEs)*length(all_var)), " (module: ",colnames(MEs)[i],", variable: ",all_var[j],"):")
+        message("")
         
         if(all_var[j] %in% Factor_Covars){
           
-          message("Spearman correlation test between ",colnames(MEs)[i] , " and ",all_var[j])
+          message("      Spearman correlation test between ",colnames(MEs)[i] , " Eigengene and ",all_var[j],"...")
           res1<-cor.test(as.numeric(MEs[,i]),as.numeric(Pheno[,all_var[j]]), method="spearman",exact = FALSE)
           cor_val[i,j]<-res1$estimate
           cor_p[i,j]<-res1$p.value
           
         }else{
-          message("Pearson correlation test between ",colnames(MEs)[i] , " and ",all_var[j])
+          message("      Pearson correlation test between ",colnames(MEs)[i] , " Eigengene and ",all_var[j],"...")
           res1<-cor.test(as.numeric(MEs[,i]),Pheno[,all_var[j]], method="pearson",exact = FALSE)
           cor_val[i,j]<-res1$estimate
           cor_p[i,j]<-res1$p.value
         }
+        message("")
       }
     }
   }
@@ -146,9 +156,16 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
     
     col.type <- vector(length = ncol(cor_val) , mode = "character")
     
+    k <- 0
+    message("Total number of test: ",ncol(MEs)," * ",length(all_var)," = ",(ncol(MEs)*length(all_var)))
+    message("")
     for(i in 1:ncol(MEs)){
       
       for (j in 1:length(all_var)) {
+        
+        k <- k+1
+        message("Analysis result ",k,"/",(ncol(MEs)*length(all_var)), " (module: ",colnames(MEs)[i],", variable: ",all_var[j],"):")
+        message("")
         
         if(all_var[j] %in% Factor_Covars){
           
@@ -157,7 +174,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
           
           if(length(df.split) == 2){
             
-            message("T test on ", colnames(MEs)[i], " ME grouped by ",all_var[j])
+            message("      T test on ", colnames(MEs)[i], " Eigengene grouped by ",all_var[j],"...")
             col.type[j] = "t_stat"
             
             res1 <- t.test(df.split[[1]]$module, df.split[[2]]$module)
@@ -166,7 +183,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
             
           }else{
             
-            message("ANOVA test for ",colnames(MEs)[i] , " grouped by ",all_var[j])
+            message("      ANOVA test for ",colnames(MEs)[i] , " Eigengene grouped by ",all_var[j],"...")
             col.type[j] = "F_val"
             
             res1<-aov(formula = module~variable , data = df )
@@ -176,13 +193,14 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
           }
         }else{
           
-          message("Pearson correlation test between ",colnames(MEs)[i] , " and ",all_var[j])
+          message("      Pearson correlation test between ",colnames(MEs)[i] , " and ",all_var[j],"...")
           col.type[j] = "Corr"
           
           res1<-cor.test(as.numeric(MEs[,i]),Pheno[,all_var[j]], method="pearson",exact = FALSE)
           cor_val[i,j]<-res1$estimate
           cor_p[i,j]<-res1$p.value
         }
+        message("")
       }
     }
     
@@ -198,12 +216,20 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
     cor_p <- vector(length = ncol(MEs) , mode = "list")
     names(cor_p) = names(cor_val) <- colnames(MEs)
     lm_data <- cbind.data.frame(MEs , Pheno)
+    
+    k <- 0
+    message("Total number of test: ",ncol(MEs))
+    message("")
     for(m in colnames(MEs)){
       
-      message("Linear regression analaysis on ", m , " :")
+      k <- k+1
+      message("Analysis result ",k,"/",ncol(MEs), " (module: ",m,"):")
+      message("")
+      
+      message("      Linear regression analaysis on ", m , " using the following model...")
       
       lm_model <- paste(m,paste(all_var , collapse = "+") , sep = "~")
-      message("      lm model: ",lm_model)
+      message("      ",lm_model)
       lm_model <- as.formula(lm_model)
       
       try(res1<-lm(lm_model ,data = lm_data, na.action = na.omit), silent = TRUE)
@@ -214,6 +240,7 @@ ModuleTrait <- function(MEs , Pheno, method="cor", Plot=T,plot.title="",return_m
       }else{
         message("lm failed!")
       }
+      message("")
     }
     cor_val <- as.matrix(do.call(rbind.data.frame, cor_val))
     cor_p <- as.matrix(do.call(rbind.data.frame, cor_p))
