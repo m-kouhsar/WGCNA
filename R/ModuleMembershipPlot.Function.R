@@ -1,15 +1,39 @@
-Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categorical.trait=TRUE,cofounders,modules,selected.genes=NA,
-                                   pval.threshold=NA,p.adjust.threshodl=NA,p.adjust.method="bonferroni",soft.power,plot.title=""){
+Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categorical.trait=TRUE,cofounders = NA,modules,selected.genes=NA,
+                                   pval_thresh=NA,p.adjust.method="bonferroni",soft.power,plot.title=""){
   suppressMessages(library(WGCNA))
   suppressMessages(library(ggplot2))
+  suppressMessages(library(ggrepel))
   suppressMessages(library(limma))
+  
+  ##########################################################################################
+  if(is.character(net.colors)){
+    if(is.null(names(net.colors))){
+      stop("Input Error: net.colors must be a named charachter vector.")
+    }
+  }else{
+    stop("Input Error: net.colors must be a named charachter vector.")
+  }
+  
+  if(is.na(pval_thresh)){
+    pval_thresh <- 0
+  }else{
+    if (!is.numeric(pval_thresh) || pval_thresh < 0 || pval_thresh > 1) {
+      stop("Input Error: 'pval_thresh' must be a numeric value between 0 and 1, or NA.")
+    }
+  }
   
   if(!identical(names(net.colors),rownames(expr.mat))){
     warning("Genes/Probes in network colors and expression matrix are not identical. The intersection will be used.")
     index <- intersect(names(net.colors),rownames(expr.mat))
-    net.colors <- net.colors[index]
-    expr.mat <- expr.mat[index, ]
+    if(length(index) <= 0){
+      stop("There is no shared gene/probe between network colors and the expression matrix!")
+    }else{
+      net.colors <- net.colors[index]
+      expr.mat <- expr.mat[index, ] 
+    }
   }
+  
+  ####################################################################################################
   message("Calculating Modules Eigengenes")
   MEs = moduleEigengenes(expr = t(expr.mat) , colors = net.colors,softPower = soft.power)$eigengenes
   MEs <- orderMEs(MEs)
@@ -38,7 +62,12 @@ Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categoric
   if(categorical.trait){
     
     metadata[,trait] <- as.factor(metadata[,trait])
-    design <- model.matrix(as.formula(paste0("~",trait,"+",paste(cofounders,collapse = "+"))),data = metadata)
+    if(is.na(cofounders)){
+      design <- model.matrix(as.formula(paste0("~",trait)),data = metadata)
+    }else{
+      design <- model.matrix(as.formula(paste0("~",trait,"+",paste(cofounders,collapse = "+"))),data = metadata)
+    }
+    
     fit <- lmFit(expr.mat, design)
     fit <- eBayes(fit)
     trait_column_name <- colnames(design)[2] 
@@ -75,34 +104,44 @@ Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categoric
                                   GS.Pval = GSPvalue[moduleGenes , 1],
                                   GS.Padj = GSPvalue.adj[moduleGenes , 1])
     c <- cor.test(plot.data$MM,plot.data$GS,method = "pearson")
+    
+    plot.data$GS_sig <- "Not Significant"
+    plot.data$GS_sig[plot.data$GS.Pval < pval_thresh] <- "Significant"
+    
     message(paste("Generating Plot for",modules[i],"module..."))
-    p <- ggplot(data = plot.data,aes(x=MM,y=GS))+
-      geom_point(color="black")+
-      geom_smooth(method = "lm") + 
-      theme_bw() + 
+    
+    p <- ggplot()+geom_point(data = plot.data,aes(x=MM,y=GS,color = GS_sig))+
+      scale_color_manual(name = "Related to trait", values = c("Not Significant" = "black" ,"Significant" = "chocolate2" ))+
+      geom_smooth(data = plot.data,aes(x=MM,y=GS),method = "lm",colour = "darkgray") + 
+      theme_minimal() + 
       theme(plot.title = element_text(hjust = 0.5))+
       xlab("Module Membership") +
-      ylab("Probe Significance") 
+      ylab("Gene Significance") 
     
+    if(pval_thresh == 0){
+      p <- p + theme(legend.position="none")
+    }
     if(is.na(plot.title)){
       p <- p+ggtitle(paste0(modules[i],"\n","(Correlation=",round(c$estimate,2),", P-value=",formatC(c$p.value,format = "e",2),")"))
     }else{
       p <- p+ggtitle(paste0(plot.title,"\n","(Correlation=",round(c$estimate,2),", P-value=",formatC(c$p.value,format = "e",2),")"))
     }
     
-    pval_na <- is.na(pval.threshold)
-    padj_na <- is.na(p.adjust.threshodl)
-    
-    if(!pval_na & padj_na){
-      selected.genes <- intersect(rownames())
-    }else if(pval_na & !padj_na){
-      
-    }else if(!pval_na & !padj_na){
-      
-    }
     if(!is.na(selected.genes[1])){
       p <- p + geom_point(data=plot.data[plot.data$ID %in% selected.genes,],
-                          pch=21, fill="blue", size=4, colour="blue", stroke=1)
+                          aes(x=MM,y=GS),
+                          shape = 1,           # 1 = open circle
+                          size = 4,            # Larger than base size (2.5) to act as a ring
+                          color = "lightblue3",      # Color of the outline
+                          stroke = 1.2,        # Thickness of the circle's line
+                          show.legend = FALSE)+
+        geom_text_repel(data=plot.data[plot.data$ID %in% selected.genes,],
+                        aes(x=MM,y=GS , label = ID),
+                        color = "black",        
+                        box.padding = 0.5,      
+                        point.padding = 0.6,    # Slightly increased to push the line past the new larger circle
+                        show.legend = FALSE,    
+                        max.overlaps = Inf)
     }
     Corrs$Module[i] <- modules[i]
     Corrs$Size[i] <- length(net.colors[net.colors==modules[i]])
