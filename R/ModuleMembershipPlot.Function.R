@@ -1,5 +1,5 @@
-Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categorical.trait=TRUE,cofounders = NA,modules,selected.genes=NA,
-                                   pval_thresh=NA,p.adjust.method="bonferroni",soft.power,plot.title=""){
+Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categorical.trait=TRUE,cofounders = NA,modules,
+                                   legend_GS_pval=NA, label_GS_pval = NA , p.adjust.method="bonferroni",soft.power,plot.title=""){
   suppressMessages(library(WGCNA))
   suppressMessages(library(ggplot2))
   suppressMessages(library(ggrepel))
@@ -14,11 +14,18 @@ Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categoric
     stop("Input Error: net.colors must be a named charachter vector.")
   }
   
-  if(is.na(pval_thresh)){
-    pval_thresh <- 0
+  if(is.na(legend_GS_pval)){
+    legend_GS_pval <- 0
   }else{
-    if (!is.numeric(pval_thresh) || pval_thresh < 0 || pval_thresh > 1) {
-      stop("Input Error: 'pval_thresh' must be a numeric value between 0 and 1, or NA.")
+    if (!is.numeric(legend_GS_pval) || legend_GS_pval < 0 || legend_GS_pval > 1) {
+      stop("Input Error: 'legend_GS_pval' must be a numeric value between 0 and 1, or NA.")
+    }
+  }
+  if(is.na(label_GS_pval)){
+    label_GS_pval <- 0
+  }else{
+    if (!is.numeric(label_GS_pval) || label_GS_pval < 0 || label_GS_pval > 1) {
+      stop("Input Error: 'label_GS_pval' must be a numeric value between 0 and 1, or NA.")
     }
   }
   
@@ -62,7 +69,7 @@ Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categoric
   if(categorical.trait){
     
     metadata[,trait] <- as.factor(metadata[,trait])
-    if(is.na(cofounders)){
+    if(all(is.na(cofounders))){
       design <- model.matrix(as.formula(paste0("~",trait)),data = metadata)
     }else{
       design <- model.matrix(as.formula(paste0("~",trait,"+",paste(cofounders,collapse = "+"))),data = metadata)
@@ -106,7 +113,7 @@ Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categoric
     c <- cor.test(plot.data$MM,plot.data$GS,method = "pearson")
     
     plot.data$GS_sig <- "Not Significant"
-    plot.data$GS_sig[plot.data$GS.Pval < pval_thresh] <- "Significant"
+    plot.data$GS_sig[plot.data$GS.Pval < legend_GS_pval] <- "Significant"
     
     message(paste("Generating Plot for",modules[i],"module..."))
     
@@ -118,7 +125,7 @@ Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categoric
       xlab("Module Membership") +
       ylab("Gene Significance") 
     
-    if(pval_thresh == 0){
+    if(legend_GS_pval == 0){
       p <- p + theme(legend.position="none")
     }
     if(is.na(plot.title)){
@@ -126,7 +133,11 @@ Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categoric
     }else{
       p <- p+ggtitle(paste0(plot.title,"\n","(Correlation=",round(c$estimate,2),", P-value=",formatC(c$p.value,format = "e",2),")"))
     }
-    
+    if(label_GS_pval == 0){
+      selected.genes <- NA
+    }else{
+      selected.genes <- plot.data$ID[plot.data$GS.Pval < label_GS_pval]
+    }
     if(!is.na(selected.genes[1])){
       p <- p + geom_point(data=plot.data[plot.data$ID %in% selected.genes,],
                           aes(x=MM,y=GS),
@@ -135,13 +146,15 @@ Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categoric
                           color = "lightblue3",      # Color of the outline
                           stroke = 1.2,        # Thickness of the circle's line
                           show.legend = FALSE)+
-        geom_text_repel(data=plot.data[plot.data$ID %in% selected.genes,],
-                        aes(x=MM,y=GS , label = ID),
-                        color = "black",        
-                        box.padding = 0.5,      
-                        point.padding = 0.6,    # Slightly increased to push the line past the new larger circle
-                        show.legend = FALSE,    
-                        max.overlaps = Inf)
+        geom_label_repel(data=plot.data[plot.data$ID %in% selected.genes,],
+                         aes(x=MM,y=GS , label = ID),
+                         fill = "white",
+                         color = "black",
+                         box.padding = 0.5,
+                         point.padding = 0.6,
+                         show.legend = F,
+                         max.overlaps = Inf,
+                         force = 10)
     }
     Corrs$Module[i] <- modules[i]
     Corrs$Size[i] <- length(net.colors[net.colors==modules[i]])
