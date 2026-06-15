@@ -12,18 +12,23 @@
 
 ################################# Argument description ##################################################
 
-# modules = Names of modules separated with comma, "all" for running analysis on all modules
-# analysis.type= one of the following options (or more than one separated by comma)
-#        "lm" -> Linear regression adjusted for all covariates
-#        "cor" -> Pearson correlation for numeric variables and Spearman correlation for categorical variables
-#        "test" -> Pearson correlation for numeric variables
-#                 t-test for binary variables
-#                 anova test for categorical and numeric variables
+# Net_file:         Network file (result of blockwiseModules function) in rds format.  
+# Expr_file:        Expression/Methylation matrix in rds or tsv format. Genes/Probes must be in rows and samples must be in columns
+# Pheno_file:       Metadata in csv format
+# modules:          Names of modules separated with comma, "all" for running analysis on all modules
+# analysis.type:    one of the following options (or more than one separated by comma)
+#                       "lm" -> Linear regression adjusted for all covariates
+#                       "cor" -> Pearson correlation for numeric variables and Spearman correlation for categorical variables
+#                       "test" -> Pearson correlation for numeric variables
+#                                  t-test for binary variables
+#                                  anova test for categorical and numeric variables
 
-# calc_ME= "yes" or "no", Calculate Module Eigengene from expression matrix
-# heatmap= "yes" or "no" , correlation plot between MEs and phenotype of interest
-# box_plot= "yes", "no" , Box plot with ANOVA,Tukay or T-test for MEs and categorical variables
-# save_csv = "yes" , or "no", Save the results in csv format
+# calc_ME:         "yes" or "no", Calculate Module Eigengene from expression matrix
+# heatmap:         "yes" or "no" , correlation plot between MEs and phenotype of interest
+# box_plot:        "yes", "no" , Box plot with ANOVA,Tukay or T-test for MEs and categorical variables
+# save_csv:        "yes" , or "no", Save the results in csv format
+# out_prefix:      Output files prefix (can be included path. The directory will be created)
+# ScriptDir:       The WGCNA repository path in your computer (eg. ./WGCNA/)
 
 #########################################################################################################
 
