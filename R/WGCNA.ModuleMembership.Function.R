@@ -129,9 +129,11 @@ Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categoric
       p <- p + theme(legend.position="none")
     }
     if(is.na(plot.title)){
-      p <- p+ggtitle(paste0(modules[i],"\n","(Correlation=",round(c$estimate,2),", P-value=",formatC(c$p.value,format = "e",2),")"))
+      p <- p+ggtitle(paste0("Module Membership vs Gene Significance plot for ",modules[i]," baesd on ",trait),
+                     subtitle = paste0("(Correlation=",round(c$estimate,2),", P-value=",formatC(c$p.value,format = "e",2),")"))
     }else{
-      p <- p+ggtitle(paste0(plot.title,"\n","(Correlation=",round(c$estimate,2),", P-value=",formatC(c$p.value,format = "e",2),")"))
+      p <- p+ggtitle(plot.title,
+                          subtitle = paste0("(Correlation=",round(c$estimate,2),", P-value=",formatC(c$p.value,format = "e",2),")"))
     }
     if(label_GS_pval == 0){
       selected.genes <- NA
@@ -163,6 +165,7 @@ Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categoric
     Plots[[i]] <- p
     Data[[i]] <- plot.data
   }
+  Corrs <- Corrs[order(as.numeric(Corrs$Pvalue) , decreasing = F),]
   return(list(Plots = Plots , Cor.test = Corrs , Data = Data))
 }
 
