@@ -12,9 +12,9 @@
 
 ################################# Argument description ##################################################
 
-# Net_file:         Network file (result of blockwiseModules function) in rds format.  
-# Expr_file:        Expression/Methylation matrix in rds or tsv format. Genes/Probes must be in rows and samples must be in columns
-# Pheno_file:       Metadata in csv format
+# net_file:         Network file (result of blockwiseModules function) in rds format.  
+# expr_file:        Expression/Methylation matrix in rds or tsv format. Genes/Probes must be in rows and samples must be in columns
+# pheno_file:       Metadata in csv format
 # modules:          Names of modules separated with comma, "all" for running analysis on all modules
 # analysis.type:    one of the following options (or more than one separated by comma)
 #                       "lm" -> Linear regression adjusted for all covariates
