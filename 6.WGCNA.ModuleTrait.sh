@@ -25,7 +25,8 @@
 
 # calc_ME:         "yes" or "no", Calculate Module Eigengene from expression matrix
 # heatmap:         "yes" or "no" , correlation plot between MEs and phenotype of interest
-# box_plot:        "yes", "no" , Box plot with ANOVA,Tukay or T-test for MEs and categorical variables
+# ME_plot:        "yes", "no" , Box plot with ANOVA,Tukay or T-test for MEs and categorical variables.
+#                               Scatter plot with correlation test for MEs and numeric variables.
 # save_csv:        "yes" , or "no", Save the results in csv format
 # out_prefix:      Output files prefix (can be included path. The directory will be created)
 # ScriptDir:       The WGCNA repository path in your computer (eg. ./WGCNA/)
@@ -43,7 +44,7 @@ analysis_type=cor
 calc_ME=no
 SoftPow=6
 heatmap=no
-box_plot=no
+ME_plot=no
 save_csv=yes
 out_prefix="./results_moduleTrait"
 
@@ -51,7 +52,7 @@ ScriptDir=./WGCNA
 #############################################################################################################################
 
 Rscript "${ScriptDir}"/R/6.WGCNA.ModuleTrait.R "$net_file" "$expr_file" "$pheno_file" "$covars_fact" "$covars_num" "$modules" \
-									   "$analysis_type" "$calc_ME" "$SoftPow" "$corr_plot" "$box_plot" "$save_csv" "$out_prefix" 
+									   "$analysis_type" "$calc_ME" "$SoftPow" "$corr_plot" "$ME_plot" "$save_csv" "$out_prefix" 
 
 
 

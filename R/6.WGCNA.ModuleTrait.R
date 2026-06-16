@@ -13,7 +13,8 @@
 
 # calc_ME:         "yes" or "no", Calculate Module Eigengene from expression matrix
 # heatmap:         "yes" or "no" , correlation plot between MEs and phenotype of interest
-# box_plot:        "yes", "no" , Box plot with ANOVA,Tukay or T-test for MEs and categorical variables
+# ME.plot:        "yes", "no" , Box plot with ANOVA,Tukay or T-test for MEs and categorical variables. 
+#                               Scatter plot with correlation test for MEs and numeric variables.
 # save_csv:        "yes" , or "no", Save the results in csv format
 # out_prefix:      Output files prefix (can be included path. The directory will be created)
 
@@ -30,7 +31,7 @@ analysis.type = trimws(argument[7])
 calc_ME = trimws(argument[8])
 SoftPow = as.numeric(trimws(argument[9]))
 heatmap= trimws(argument[10])
-box.plot = trimws(argument[11])
+ME.plot = trimws(argument[11])
 save_csv= trimws(argument[12])
 out_pref = trimws(argument[13])
 
@@ -47,7 +48,7 @@ cat("     Analysis type = ",analysis.type,"\n")
 cat("     Do you want to calculate ME from expr/methyl matrix? ",calc_ME,"\n")
 cat("     Softthrshold power (For calculating ME) = ",SoftPow,"\n")
 cat("     Do you want to generate correlation plot? ",heatmap,"\n")
-cat("     Do you want to generate box plot? ",box.plot,"\n")
+cat("     Do you want to generate box plot? ",ME.plot,"\n")
 cat("     Do you want to save results in a csv file? ",save_csv,"\n")
 cat("\n")
 cat("Loading libraries...\n")
@@ -69,7 +70,7 @@ cat("Reading Inputs...\n")
 
 calc_ME = ifelse(tolower(calc_ME)=="yes",T,F)
 heatmap= ifelse(tolower(heatmap)=="yes",T,F)
-box.plot = ifelse(tolower(box.plot)=="yes",T,F)
+ME.plot = ifelse(tolower(ME.plot)=="yes",T,F)
 save_csv= ifelse(tolower(save_csv) =="yes",T,F)
 
 covars_fact=trimws(str_split_1(covars_fact,pattern = ','))
@@ -136,13 +137,13 @@ for (k in 1:length(analysis.type)) {
   
 }
 
-if(box.plot){
+if(ME.plot){
   pdf(NULL)
   cat("Generating box plots...\n")
   for (v in covars_fact) {
     p=list()
     for (i in 1:length(modules)) {
-      p[[modules[i]]] = plot_custom_boxplot(factor_vec = pheno[,v],numeric_vec = net$MEs[,modules[i]],xlabel = v,ylabel = "ME",title = modules[i])
+      p[[modules[i]]] = plot_custom_boxplot(vector1 = pheno[,v],vector2 = net$MEs[,modules[i]],type ="test", xlabel = v,ylabel = "ME",title = modules[i])
     }
     
     multipage_layout <- marrangeGrob(
@@ -152,7 +153,28 @@ if(box.plot){
     )
     
     ggsave(
-      filename =  paste0(out_pref,".ModuleTrait.",v,".BoxPlot.pdf"),
+      filename =  paste0(out_pref,".ModuleTrait.",v,".MEPlot.pdf"),
+      plot = multipage_layout,
+      width = 10,
+      height = 8
+    )
+    
+  }
+  
+  for (v in covars_num) {
+    p=list()
+    for (i in 1:length(modules)) {
+      p[[modules[i]]] = plot_custom_boxplot(vector1 = pheno[,v],vector2 = net$MEs[,modules[i]],type ="cor", xlabel = v,ylabel = "ME",title = modules[i])
+    }
+    
+    multipage_layout <- marrangeGrob(
+      grobs = p, 
+      nrow = 2, 
+      ncol = 2
+    )
+    
+    ggsave(
+      filename =  paste0(out_pref,".ModuleTrait.",v,".MEPlot.pdf"),
       plot = multipage_layout,
       width = 10,
       height = 8
