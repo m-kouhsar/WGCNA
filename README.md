@@ -8,7 +8,7 @@ All input arguments should be set in the corresponding `sh` scripts. After that,
 
 ## Analysis Steps
 
-The analysis pipeline is based on the following steps:
+The analysis is based on the following steps:
 
 ### Step 1: Gene or CpG Filtering
 
