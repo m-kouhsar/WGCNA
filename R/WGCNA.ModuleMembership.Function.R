@@ -1,5 +1,5 @@
 Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categorical.trait=TRUE,cofounders = NA,modules,
-                                   legend_GS_pval=NA, label_GS_pval = NA , p.adjust.method="bonferroni",soft.power,plot.title=""){
+                                   legend_GS_pval=NA, label_GS_pval = NA , p.adjust.method="bonferroni",soft.power,plot.title=NA){
   suppressMessages(library(WGCNA))
   suppressMessages(library(ggplot2))
   suppressMessages(library(ggrepel))
@@ -121,7 +121,6 @@ Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categoric
       scale_color_manual(name = paste0("Related to trait\n","(P-value < ",signif(legend_GS_pval , digits = 2),")"), values = c("Not Significant" = "black" ,"Significant" = "chocolate2" ))+
       geom_smooth(data = plot.data,aes(x=MM,y=GS),method = "lm",colour = "darkgray") + 
       theme_minimal() + 
-      theme(plot.title = element_text(hjust = 0.5))+
       xlab("Module Membership") +
       ylab("Gene Significance") 
     
@@ -129,7 +128,7 @@ Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categoric
       p <- p + theme(legend.position="none")
     }
     if(is.na(plot.title)){
-      p <- p+ggtitle(paste0("Module Membership vs Gene Significance plot for ",modules[i]," baesd on ",trait),
+      p <- p+ggtitle(paste0("MM vs GS, ",modules[i],", ",trait),
                      subtitle = paste0("(Correlation=",round(c$estimate,2),", P-value=",formatC(c$p.value,format = "e",2),")"))
     }else{
       p <- p+ggtitle(plot.title,
