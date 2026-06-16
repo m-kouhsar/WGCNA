@@ -1,65 +1,68 @@
 # WGCNA
 
-This repository contains some scripts to run Weighted Gene Co-expression Network Analysis (WGCNA) on DNA Methylation or RNA Expression data. 
-The expression (or methylation) matrix, in `tsv` or `rds` format,  with matched metadata in `csv` format are  requiered to run the analysis. You can start with count matrix and normalized beta/M values in expression and methylation data, respectively. 
-All the input arguments need to be set in `sh` scripts and after that you can run each script simply by `bash` command. All results and plots will be save in the output directory you set. 
+This repository contains scripts for running Weighted Gene Co-expression Network Analysis (WGCNA) on DNA methylation or RNA expression data.
 
-## Analysis steps
+An expression (or methylation) matrix in `tsv` or `rds` format, together with matched metadata in `csv` format, is required to run the analysis. You can start with a count matrix for expression data or normalized beta/M values for methylation data.
 
-The analysis pipeline is designed based on the following steps:
+All input arguments should be set in the corresponding `sh` scripts. After that, each script can be executed using the `bash` command. All results and plots will be saved to the output directory you specify.
 
-### Step1: Gene or CpG filtering
+## Analysis Steps
 
-Some basic filtering, for example removing low count genes in expression data and removing SNP probes in methylation data, can be done using `1.ProbeFiltering_Expression.sh` and `1.ProbeFiltering_Methylation.sh`scripts. 
+The analysis pipeline is based on the following steps:
 
-### Step2: Removing batch effects
+### Step 1: Gene or CpG Filtering
 
-To remove the effect of any cofounder or batch in your data, you can use `2.BatchRemoval.sh`. It will use `limma::removeBatchEffect()` function to regress out the effect of cofounders.
+Basic filtering, such as removing low-count genes in expression data or removing SNP probes in methylation data, can be performed using `1.ProbeFiltering_Expression.sh` and `1.ProbeFiltering_Methylation.sh`.
 
-### Step3: Filtering low variance genes or CpGs using Median Absolute Deviation (MAD)
+### Step 2: Removing Batch Effects
 
-The third optional but highly recommended step is removing low variance features from the data by filtering out those features with low MAD value in the data. 
-You can run this step using `3.MADFiltering.sh`. 
+To remove the effects of confounders or batch variables in your data, you can use `2.BatchRemoval.sh`. This script uses the `limma::removeBatchEffect()` function to regress out the effects of confounding variables.
 
-### Step4: Finding approperiate soft-thresholding power for network construction
+### Step 3: Filtering Low-Variance Genes or CpGs Using Median Absolute Deviation (MAD)
 
-Before the network reconstruction and finding modules, you need to check the scale free topology index to find the best soft-thresholding power. 
-You can use `4.WGCNA.PicSoftPower.sh`script to do this.
+The third step, which is optional but highly recommended, removes low-variance features from the data by filtering features with low MAD values.
 
-### Step5: Network reconstruction and module finding
+You can run this step using `3.MADFiltering.sh`.
 
-In this step, you can find the co-expressed gene or co-methylated CpG modules in your data using `WGCNA::blockwiseModules()` function. 
-The main output of this step would be a network object saved in `rds` format.
+### Step 4: Finding an Appropriate Soft-Thresholding Power for Network Construction
 
-### Step6: Module-Trait relationship analysis
+Before network construction and module detection, you should evaluate the scale-free topology fit index to determine the optimal soft-thresholding power.
 
-To run this step you need the network object in `rds` format and the metadata in `csv` format. 
-The `6.ModuleTrait.sh` script can help you to check the relationship between the modules and your variables of interest using linear regression (`analysis_type = "lm"`), 
-t-test or ANOVA and Tukey test (`analysis_type = "test"`) or even a simple Pearson or Spearman correlation test (`analysis_type = "cor"`). 
+You can use `4.WGCNA.PicSoftPower.sh` to perform this step.
 
-The recommended approach is using `test` method on all modules (set module argument to `all`) to find those modules significantly related to the trait and then useing `lm` 
-method to confirm your finding by adjusting the Module-Trait test based on the cofounders (e.g. Sex and Age).
+### Step 5: Network Construction and Module Detection
 
-This script can also visualize Module-Trait relationships using a heatmap (`heatmap = yes`), 
-box plot based on Module Eigengene (ME) and categorical variables and a scatter plot to show the correlation between ME and numeric variables (`ME_plot = yes`).
+In this step, co-expressed gene modules or co-methylated CpG modules are identified using the `WGCNA::blockwiseModules()` function.
 
-### Step7: Module Membership VS Gene Significance analysis
+The main output of this step is a network object saved in `rds` format.
 
-In this step, you can use `7.WGCAN.ModuleMembership.sh` script to calculate Module Membership (MM) and Gene Significance (GS) for all genes in each module based on the variable of interest (Trait) and visualized it in a scatter plot. 
-The plot can show those genes/CpGs that are significantly related to the trait based on an input P-value threshold (`GS_legend_pvalue`). 
-It can also tag the most significant genes/CpGs in the plot by adding their ID as label based on another p-value threshold (`GS_label_pvalue`).
+### Step 6: Module–Trait Relationship Analysis
 
-For categorical trait, the script will use `limma::lmFit()` and a linear regression model to calculate GS. 
-So, you can optionally add any cofounders to the model by setting `Cofounders_num` for numeric cofounders and `Cofounders_cat`for categorical cofounders. 
+To run this step, you need the network object in `rds` format and the metadata in `csv` format.
 
-To have a general view of the data and find any possible outlier samples using principal componenet analysis and Mahalanobis distance, the `DataOutlierChecking.sh` is provided. 
-Outlier samples can be removed using `OutlierRemoval.sh`. 
+The `6.ModuleTrait.sh` script can be used to assess relationships between modules and variables of interest using linear regression (`analysis_type = "lm"`), t-tests or ANOVA with Tukey post-hoc tests (`analysis_type = "test"`), or Pearson/Spearman correlation analysis (`analysis_type = "cor"`).
 
-## Other available scripts
+The recommended approach is to use the `test` method on all modules (`module = "all"`) to identify modules significantly associated with the trait and then use the `lm` method to confirm these associations while adjusting for confounders (e.g., sex and age).
 
-Some other `R` and `bash` scripts are also available. For example:
+This script can also visualize module–trait relationships using a heatmap (`heatmap = yes`), box plots of Module Eigengenes (ME) against categorical variables, and scatter plots showing correlations between ME values and numeric variables (`ME_plot = yes`).
+
+### Step 7: Module Membership vs. Gene Significance Analysis
+
+In this step, `7.WGCNA.ModuleMembership.sh` can be used to calculate Module Membership (MM) and Gene Significance (GS) for all genes within each module with respect to a trait of interest and to visualize the results in a scatter plot.
+
+The plot can highlight genes/CpGs significantly associated with the trait based on a user-defined p-value threshold (`GS_legend_pvalue`). It can also label the most significant genes/CpGs using a separate threshold (`GS_label_pvalue`).
+
+For categorical traits, the script uses `limma::lmFit()` and a linear model to calculate GS values.
+
+You can optionally adjust for confounders by specifying `Cofounders_num` for numeric confounders and `Cofounders_cat` for categorical confounders.
+
+To obtain an overview of the data and identify potential outlier samples using principal component analysis (PCA) and Mahalanobis distance, `DataOutlierChecking.sh` is provided. Outlier samples can then be removed using `OutlierRemoval.sh`.
+
+## Other Available Scripts
+
+Several additional `R` and `bash` scripts are also available. For example:
 
 * `WGCNA.CytoscapeExport.sh` for exporting modules in [Cytoscape](https://cytoscape.org/) format.
 * `WGCNA.ModulePreservation.sh` for module preservation analysis and visualization.
-* `ME.box.plot.R` for creating a box plot based on Module Eigengene and trait variable in one or two datasets (see [this figure part C](https://alz-journals.onlinelibrary.wiley.com/cms/asset/62e080f4-55ea-4b2d-a90b-af5e16b4198f/alz14501-fig-0002-m.jpg)).
-* `Merged.ModuleMembershipPlot.R` for visualizing the MM vs GS in a module in two different datasets in one scatter plot (see [this figure part D](https://alz-journals.onlinelibrary.wiley.com/cms/asset/62e080f4-55ea-4b2d-a90b-af5e16b4198f/alz14501-fig-0002-m.jpg))
+* `ME.box.plot.R` for creating box plots based on Module Eigengenes and trait variables in one or two datasets (see [Figure 2C](https://alz-journals.onlinelibrary.wiley.com/cms/asset/62e080f4-55ea-4b2d-a90b-af5e16b4198f/alz14501-fig-0002-m.jpg)).
+* `Merged.ModuleMembershipPlot.R` for visualizing MM vs. GS relationships within a module across two different datasets in a single scatter plot (see [Figure 2D](https://alz-journals.onlinelibrary.wiley.com/cms/asset/62e080f4-55ea-4b2d-a90b-af5e16b4198f/alz14501-fig-0002-m.jpg)).
