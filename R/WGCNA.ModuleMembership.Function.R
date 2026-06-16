@@ -118,7 +118,7 @@ Module.Membership.Plot <- function(net.colors, expr.mat,metadata,trait,categoric
     message(paste("Generating Plot for",modules[i],"module..."))
     
     p <- ggplot()+geom_point(data = plot.data,aes(x=MM,y=GS,color = GS_sig))+
-      scale_color_manual(name = "Related to trait", values = c("Not Significant" = "black" ,"Significant" = "chocolate2" ))+
+      scale_color_manual(name = paste0("Related to trait\n","P-value < ",signif(legend_GS_pval , digits = 2)), values = c("Not Significant" = "black" ,"Significant" = "chocolate2" ))+
       geom_smooth(data = plot.data,aes(x=MM,y=GS),method = "lm",colour = "darkgray") + 
       theme_minimal() + 
       theme(plot.title = element_text(hjust = 0.5))+
