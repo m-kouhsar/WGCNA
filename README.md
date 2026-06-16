@@ -56,11 +56,11 @@ For categorical traits, the script uses `limma::lmFit()` and a linear model to c
 
 You can optionally adjust for confounders by specifying `Cofounders_num` for numeric confounders and `Cofounders_cat` for categorical confounders.
 
-To obtain an overview of the data and identify potential outlier samples using principal component analysis (PCA) and Mahalanobis distance, `DataOutlierChecking.sh` is provided. Outlier samples can then be removed using `OutlierRemoval.sh`.
-
 ## Other Available Scripts
 
-Several additional `R` and `bash` scripts are also available. For example:
+To obtain an overview of the data and identify potential outlier samples using principal component analysis (PCA) and Mahalanobis distance, `DataOutlierChecking.sh` is provided. Outlier samples can then be removed using `OutlierRemoval.sh`.
+
+Some additional `R` and `bash` scripts are also available. For example:
 
 * `WGCNA.CytoscapeExport.sh` for exporting modules in [Cytoscape](https://cytoscape.org/) format.
 * `WGCNA.ModulePreservation.sh` for module preservation analysis and visualization.
