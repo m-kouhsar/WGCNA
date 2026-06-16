@@ -1,6 +1,6 @@
 # WGCNA
 
-This repository contains some scripts to run Weighted Gene Co-expression Network Analysis (WGCNA) on DMA Methylation or RNA Expression data. 
+This repository contains some scripts to run Weighted Gene Co-expression Network Analysis (WGCNA) on DNA Methylation or RNA Expression data. 
 The expression (or methylation) matrix, in `tsv` or `rds` format,  with matched metadata in `csv` format are  requiered to run the analysis. You can start with count matrix and normalized beta/M values in expression and methylation data, respectively. 
 All the input arguments need to be set in `sh` scripts and after that you can run each script simply by `bash` command. All results and plots will be save in the output directory you set. 
 The analysis pipeline is designed based on the following steps:
