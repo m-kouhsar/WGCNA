@@ -139,47 +139,52 @@ for (k in 1:length(analysis.type)) {
 
 if(ME.plot){
   pdf(NULL)
-  cat("Generating box plots...\n")
+  cat("Generating ME plots...\n")
   for (v in covars_fact) {
     p=list()
     for (i in 1:length(modules)) {
-      p[[modules[i]]] = plot_custom_boxplot(vector1 = pheno[,v],vector2 = net$MEs[,modules[i]],type ="test", xlabel = v,ylabel = "ME",title = modules[i])
+      p[[modules[i]]] = plot_custom_boxplot(vector1 = as.factor(pheno[,v]),vector2 = net$MEs[,modules[i]],type ="test", 
+                                            xlabel = v,ylabel = "ME",title = modules[i],pvalue=0.05)
     }
     
-    multipage_layout <- marrangeGrob(
-      grobs = p, 
-      nrow = 2, 
-      ncol = 2
-    )
-    
-    ggsave(
-      filename =  paste0(out_pref,".ModuleTrait.",v,".MEPlot.pdf"),
-      plot = multipage_layout,
-      width = 10,
-      height = 8
-    )
-    
+    p <- Filter(Negate(is.null), p)
+    if(length(p) > 0){
+      multipage_layout <- marrangeGrob(
+        grobs = p, 
+        nrow = 2, 
+        ncol = 2
+      )
+      
+      ggsave(
+        filename =  paste0(out_pref,".ModuleTrait.",v,".MEPlot.pdf"),
+        plot = multipage_layout,
+        width = 10,
+        height = 8
+      )
+    }
   }
   
   for (v in covars_num) {
     p=list()
     for (i in 1:length(modules)) {
-      p[[modules[i]]] = plot_custom_boxplot(vector1 = pheno[,v],vector2 = net$MEs[,modules[i]],type ="cor", xlabel = v,ylabel = "ME",title = modules[i])
+      p[[modules[i]]] = plot_custom_boxplot(vector1 = pheno[,v],vector2 = net$MEs[,modules[i]],type ="cor", 
+                                            xlabel = v,ylabel = "ME",title = modules[i],pvalue=0.05)
     }
     
-    multipage_layout <- marrangeGrob(
-      grobs = p, 
-      nrow = 2, 
-      ncol = 2
-    )
-    
-    ggsave(
-      filename =  paste0(out_pref,".ModuleTrait.",v,".MEPlot.pdf"),
-      plot = multipage_layout,
-      width = 10,
-      height = 8
-    )
-    
+    p <- Filter(Negate(is.null), p)
+    if(length(p) > 0){
+      multipage_layout <- marrangeGrob(
+        grobs = p, 
+        nrow = 2, 
+        ncol = 2
+      )
+      
+      ggsave(
+        filename =  paste0(out_pref,".ModuleTrait.",v,".MEPlot.pdf"),
+        plot = multipage_layout,
+        width = 10,
+        height = 8
+      )
+    }
   }
-  
 }

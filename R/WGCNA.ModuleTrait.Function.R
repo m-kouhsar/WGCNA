@@ -1,8 +1,12 @@
-plot_custom_boxplot <- function(vector1, vector2, type=c("test","cor"), xlabel="",ylabel="", title="") {
+plot_custom_boxplot <- function(vector1, vector2, type=c("test","cor"), xlabel="",ylabel="", title="",pvalue=NA) {
   
   type <- match.arg(type)
   
-  p <- NA
+  if(is.na(pvalue)){
+    pvalue <- 1
+  }
+  
+  p <- NULL
   
   if(type == "test"){
     
@@ -44,14 +48,19 @@ plot_custom_boxplot <- function(vector1, vector2, type=c("test","cor"), xlabel="
       test_res <- plot_data %>% t_test(Value ~ Category) %>% add_xy_position(x = "Category")
       test_res$label <- paste0("p = ", signif(test_res$p, 2))
       
-      p <- p + stat_pvalue_manual(
-        test_res, 
-        label = "label", 
-        inherit.aes = FALSE,
-        tip.length = 0.01,
-        step.increase = 0.1,
-        hide.ns = FALSE
-      )
+      if(test_res$p < pvalue){
+        p <- p + stat_pvalue_manual(
+          test_res, 
+          label = "label", 
+          inherit.aes = FALSE,
+          tip.length = 0.01,
+          step.increase = 0.1,
+          hide.ns = FALSE
+        )
+      }else{
+        p <- NULL
+      }
+      
       
     } else {
       # Tukey HSD for > 2 levels
@@ -63,31 +72,40 @@ plot_custom_boxplot <- function(vector1, vector2, type=c("test","cor"), xlabel="
       # Create the exact label format matching your image (e.g., "p = 0.049")
       tukey_res$label <- paste0("p = ", signif(tukey_res$p.adj, 2))
       
-      # Add your suggested stat_pvalue_manual layer
-      p <- p + stat_pvalue_manual(
-        tukey_res, 
-        label = "label",            # Uses the formatted column we just created
-        inherit.aes = FALSE,
-        tip.length = 0.01,          # Shorten the bracket tips
-        step.increase = 0.1,        # Prevents brackets from overlapping
-        hide.ns = FALSE
-      )
+      if(any(tukey_res$p.adj < pvalue)){
+        # Add your suggested stat_pvalue_manual layer
+        p <- p + stat_pvalue_manual(
+          tukey_res, 
+          label = "label",            # Uses the formatted column we just created
+          inherit.aes = FALSE,
+          tip.length = 0.01,          # Shorten the bracket tips
+          step.increase = 0.1,        # Prevents brackets from overlapping
+          hide.ns = FALSE
+        )
+      }else{
+        p <- NULL
+      }
+      
     }
   }
-  # 1. Validate and prep inputs
   
   if(type == "cor"){
     vector1 <- as.numeric(vector1)
     vector2 <- as.numeric(vector2)
+    test_c <- cor.test(vector1 , vector2 , method = "pearson")
+    if(test_c$p.value < pvalue){
+      p <- ggplot(data = data.frame(x=vector1 , y=vector2),aes(x , y))+geom_point()+
+        ggpubr::stat_cor(method = "pearson")+
+        geom_smooth(data = data.frame(x=vector1 , y=vector2),aes(x,y) , formula = y ~ x ,method = lm )+
+        labs(
+          title = title,
+          x = xlabel,
+          y = ylabel
+        )
+    }else{
+      p <- NULL
+    }
     
-    p <- ggplot(data = data.frame(x=vector1 , y=vector2),aes(x , y))+geom_point()+
-      ggpubr::stat_cor(method = "pearson")+
-      geom_smooth(data = data.frame(x=vector1 , y=vector2),aes(x,y) , formula = y ~ x ,method = lm )+
-      labs(
-        title = title,
-        x = xlabel,
-        y = ylabel
-      )
   }
   
   return(p)
