@@ -56,6 +56,8 @@ For categorical traits, the script uses `limma::lmFit()` and a linear model to c
 
 You can optionally adjust for confounders by specifying `Cofounders_num` for numeric confounders and `Cofounders_cat` for categorical confounders.
 
+A `csv` file will be saved for each module, containing MM and GS values along with their corresponding p-values. These files can be used to identify hub genes/CpGs within the modules for downstream analyses.
+
 ## Other Available Scripts
 
 To obtain an overview of the data and identify potential outlier samples using principal component analysis (PCA) and Mahalanobis distance, `DataOutlierChecking.sh` is provided. Outlier samples can then be removed using `OutlierRemoval.sh`.

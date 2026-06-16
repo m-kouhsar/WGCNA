@@ -108,7 +108,7 @@ for (m in modules) {
   graphics.off()
   write.csv(MM$Data[[m]] , file = paste0(out_prefix,".",m,".MM.GS.csv"),row.names = F)
 }
-write.csv(MM$Cor.test , file =paste0(out_prefix,".","MM_vs_GS.csv") )
+write.csv(MM$Cor.test , file =paste0(out_prefix,".","MM_vs_GS.csv"),row.names = F )
 
 
 
