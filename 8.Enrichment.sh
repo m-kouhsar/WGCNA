@@ -43,5 +43,5 @@ out_prefix="./Results/Enrichment/module28"
 ScriptDir="./WGCNA"
 #########################################################################
 
-Rscript "$ScriptDir"/R/Enrichment.R "$MM_GS_file" "$Net_file" "$methylation" "$MM" "$MM_pval" "$GS" "$GS_pval" "$out_prefix"
+Rscript "$ScriptDir"/R/8.Enrichment.R "$MM_GS_file" "$Net_file" "$methylation" "$MM" "$MM_pval" "$GS" "$GS_pval" "$out_prefix"
 

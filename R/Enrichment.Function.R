@@ -1,32 +1,33 @@
 gometh_dotplot <- function(gometh_res,
                            showCategory = 20, 
-                           fdr.cutoff = 0.05, 
+                           fdr.cutoff = NA, 
                            pval.cutoff = NA, 
-                           label_format = 30) {
+                           label_format = 35,
+                           plot.title = NA) {
   suppressPackageStartupMessages({
     library(ggplot2)
     library(dplyr)
-    library(tibble)
-    library(stringr)  
+    # library(tibble)
+    # library(stringr)  
   })
-
-  # 1. Pre-process and calculate GeneRatio FIRST (Correct Way)
-  processed_data <- gometh_res |>
-    rownames_to_column(var = "ID") 
   
-  # 2. Apply filters to the pathways afterward
-  if (!is.null(fdr.cutoff)) {
-    processed_data <- processed_data |> filter(FDR < fdr.cutoff)
+  plot_data <- gometh_res 
+  
+  if (!is.na(fdr.cutoff)) {
+    plot_data <- plot_data |> filter(FDR < fdr.cutoff)
   }
   
-  if (!is.null(pval.cutoff)) {
-    processed_data <- processed_data |> filter(P.DE < pval.cutoff)
+  if (!is.na(pval.cutoff)) {
+    plot_data <- plot_data |> filter(P.DE < pval.cutoff)
   }
   
   # 3. Select top categories based on GeneRatio
-  plot_data <- processed_data |>
-    arrange(desc(GeneRatio)) |>
+  plot_data <- plot_data |>
+    arrange(P.DE) |>
     slice_head(n = showCategory)
+  
+  plot_data <- plot_data |>
+    arrange(desc(GeneRatio))
   
   if (nrow(plot_data) == 0) {
     stop("No pathways passed the specified significance cutoffs.")
@@ -41,11 +42,11 @@ gometh_dotplot <- function(gometh_res,
   # 5. Build the ggplot
   p <- ggplot(plot_data, aes(x = GeneRatio, y = WrappedTERM)) +
     theme_bw(base_size = 12) +
-    geom_point(aes(size = N, fill = FDR), shape = 21, color = "black", stroke = 0.5) +
-    scale_fill_gradient(low = "#e41a1c", high = "#377eb8", name = "p.adjust") +
+    geom_point(aes_string(size = "N", fill = ifelse(is.na(fdr.cutoff),"P.DE","FDR")), shape = 21, color = "black", stroke = 0.5) +
+    scale_fill_gradient(low = "#e41a1c", high = "#377eb8", name = ifelse(is.na(fdr.cutoff),"pvalue","p.adjust")) +
     scale_size_continuous(name = "Count") +
     labs(
-      title = "dotplot for ORA",
+      title = ifelse(is.na(plot.title),paste0("Enrichment Analysis: Top ",showCategory," significant results."),plot.title),
       x = "GeneRatio",
       y = NULL
     ) +

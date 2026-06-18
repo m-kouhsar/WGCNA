@@ -1,4 +1,5 @@
 argument <- commandArgs(T)
+
 MM_GS_file <- trimws(argument[1])
 Net_file <- trimws(argument[2])
 ID_type <- trimws(argument[3])                #entrez,symbol,cpg,ensembl
@@ -40,15 +41,21 @@ net <- readRDS(Net_file)
 
 gene_list <- MM_GS$ID[(MM_GS$MM > MM) & 
                         (MM_GS$GS > GS) & 
-                        (MM_GS$MM.Pval > MM_pval) & 
-                        (MM_GS$GS.Pval > GS_pval)]
+                        (MM_GS$MM.Pval < MM_pval) & 
+                        (MM_GS$GS.Pval < GS_pval)]
+
+if(length(gene_list) == 0){
+  stop("No gene/probe passed the specified cutoffs.")
+}else{
+  message(length(gene_list)," genes/probes passed the specified cutoffs.")
+}
 
 univers_list <- names(net$colors)
 
 if(methylation){
   message("CpG set enrichment analysis using missMethyl::gometh...")
   go_results <- gometh(
-    sig.cpg = sig_cpgs,          # Vector of significant CpG IDs
+    sig.cpg = gene_list,          # Vector of significant CpG IDs
     all.cpg = univers_list,          # Vector of background CpGs (the universe)
     collection = "GO",           # Specify "GO" or "KEGG"
     array.type = "EPIC",         # Change to "450K" if using older arrays
@@ -56,15 +63,19 @@ if(methylation){
     sig.genes = T
   )
   
-  go_results$GeneRatio <- go_results$P.DE/sig_cpgs
-  go_results$BgRatio <- go_results$N/univers_list
-  go_results_BP <- go_results[go_results$ONTOLOGY == "BP"]
-  go_results_MF <- go_results[go_results$ONTOLOGY == "MF"]
-  go_results_CC <- go_results[go_results$ONTOLOGY == "CC"]
+  go_results$GeneRatio <- go_results$DE/length(gene_list)
+  go_results$BgRatio <- go_results$N/length(univers_list)
+  go_results_BP <- go_results[(!is.na(go_results$ONTOLOGY)) & (go_results$ONTOLOGY == "BP"),]
+  go_results_MF <- go_results[(!is.na(go_results$ONTOLOGY)) & (go_results$ONTOLOGY == "MF"),]
+  go_results_CC <- go_results[(!is.na(go_results$ONTOLOGY)) & (go_results$ONTOLOGY == "CC"),]
   
-  plot.BP <- gometh_dotplot(gometh_res = go_results_BP , showCategory = 20 , fdr.cutoff = 0.05,label_format = 30)
-  plot.MF <- gometh_dotplot(gometh_res = go_results_MF , showCategory = 20 , fdr.cutoff = 0.05,label_format = 30)
-  plot.CC <- gometh_dotplot(gometh_res = go_results_CC , showCategory = 20 , fdr.cutoff = 0.05,label_format = 30)
+  message("Generating plots...")
+  plot.BP <- gometh_dotplot(gometh_res = go_results_BP , showCategory = 20,
+                            plot.title = "Top 20 GO Biological Process enrichment results" )
+  plot.MF <- gometh_dotplot(gometh_res = go_results_MF , showCategory = 20 ,
+                            plot.title = "Top 20 GO Molecular Function enrichment results")
+  plot.CC <- gometh_dotplot(gometh_res = go_results_CC , showCategory = 20,
+                            plot.title = "Top 20 GO Cellular Component enrichment results" )
   
   kegg_results <- gometh(
     sig.cpg = sig_cpgs,
@@ -78,7 +89,7 @@ if(methylation){
   kegg_results$GeneRatio <- kegg_results$P.DE/sig_cpgs
   kegg_results$BgRatio <- kegg_results$N/univers_list
   
-  plot.KEGG <- gometh_dotplot(gometh_res = kegg_results , showCategory = 20 , fdr.cutoff = 0.05,label_format = 30)
+  plot.KEGG <- gometh_dotplot(gometh_res = kegg_results , showCategory = 20 )
   
 }
 
@@ -120,27 +131,25 @@ if(!methylation){
     go_results_MF <- go_results |> filter(ONTOLOGY == "MF")
     go_results_CC <- go_results |> filter(ONTOLOGY == "CC")
     
+    message("Generating plots...")
     plot.BP <- dotplot(go_results_BP , 
                        x = "GeneRatio",
                        color = "p.adjust",
                        showCategory = 20, 
-                       title="Top 20 GO Biological Process enrichment results",
-                       label_format = 30
+                       title="Top 20 GO Biological Process enrichment results"
                       )
     plot.MF <- dotplot(go_results_MF , 
                        x = "GeneRatio",
                        color = "p.adjust",
                        showCategory = 20, 
-                       title="Top 20 GO Molecular Function enrichment results",
-                       label_format = 30
-    )
+                       title="Top 20 GO Molecular Function enrichment results"
+                      )
     plot.CC <- dotplot(go_results_CC , 
                        x = "GeneRatio",
                        color = "p.adjust",
                        showCategory = 20, 
-                       title="Top 20 GO Cellular Component enrichment results",
-                       label_format = 30
-    )
+                       title="Top 20 GO Cellular Component enrichment results"
+                      )
     
     go_results_BP <- as.data.frame(go_results_BP@result)
     go_results_MF <- as.data.frame(go_results_MF@result)
@@ -162,8 +171,7 @@ if(!methylation){
                          x = "GeneRatio",
                          color = "p.adjust",
                          showCategory = 20, 
-                         title="Top 20 KEGG enrichment results",
-                         label_format = 30
+                         title="Top 20 KEGG enrichment results"
                          )
     
     kegg_results <- as.data.frame(kegg_results@result)
@@ -171,6 +179,7 @@ if(!methylation){
   }
 }
 
+message("Saving results...")
 pdf(paste0(out_prefix , ".Enrichment.pdf"))
 print(plot.KEGG)
 print(plot.BP)
