@@ -58,6 +58,11 @@ You can optionally adjust for confounders by specifying `Cofounders_num` for num
 
 A `csv` file will be saved for each module, containing MM and GS values along with their corresponding p-values. These files can be used to identify hub genes/CpGs within the modules for downstream analyses.
 
+### Step 8: Enrichment Analysis
+
+After running Module Membership analysis, for each selected module, you would have a `csv` file contains MM and GS values and their corresponding P-values. 
+You can use `8.Enrichment.sh` script to select hub genes/probes in your selected module and run a KEGG and GO enrichment analysis. 
+
 ## Other Available Scripts
 
 To obtain an overview of the data and identify potential outlier samples using principal component analysis (PCA) and Mahalanobis distance, `DataOutlierChecking.sh` is provided. Outlier samples can then be removed using `OutlierRemoval.sh`.
