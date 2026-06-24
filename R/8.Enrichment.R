@@ -106,7 +106,8 @@ if(methylation){
   kegg_results$GeneRatio <- kegg_results$DE/length(gene_list)
   kegg_results$BgRatio <- kegg_results$N/length(univers_list)
   
-  plot.KEGG <- gometh_dotplot(gometh_res = kegg_results , showCategory = 20 )
+  plot.KEGG <- gometh_dotplot(gometh_res = kegg_results , showCategory = 20,
+                              plot.title = "Top 20 KEGG enrichment results")
   
 }
 
