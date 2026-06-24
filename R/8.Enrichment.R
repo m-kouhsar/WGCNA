@@ -92,16 +92,16 @@ if(methylation){
                             plot.title = "Top 20 GO Cellular Component enrichment results" )
   
   kegg_results <- gometh(
-    sig.cpg = sig_cpgs,
-    all.cpg = all_cpgs,
+    sig.cpg = gene_list,
+    all.cpg = univers_list,
     collection = "KEGG",
     array.type = "EPIC",
     prior.prob = TRUE,
     sig.genes = T
   )
   
-  kegg_results$GeneRatio <- kegg_results$P.DE/sig_cpgs
-  kegg_results$BgRatio <- kegg_results$N/univers_list
+  kegg_results$GeneRatio <- kegg_results$DE/length(gene_list)
+  kegg_results$BgRatio <- kegg_results$N/length(univers_list)
   
   plot.KEGG <- gometh_dotplot(gometh_res = kegg_results , showCategory = 20 )
   
