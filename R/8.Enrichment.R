@@ -118,8 +118,8 @@ if(!methylation){
       gene_list, 
       fromType = "SYMBOL", 
       toType   = "ENTREZID", 
-      OrgDb    = org.Hs.eg.db
-    )else if(ID_type == "ensembl"){
+      OrgDb    = org.Hs.eg.db)
+    }else if(ID_type == "ensembl"){
       gene_list_entrez <- clusterProfiler::bitr(
         gene_list, 
         fromType = "ENSEMBL",    # Current format
@@ -196,7 +196,6 @@ if(!methylation){
     
     kegg_results <- as.data.frame(kegg_results@result)
     
-  }
 }
 
 message("Saving results...")
