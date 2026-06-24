@@ -68,6 +68,8 @@ univers_list <- names(net$colors)
 
 if(methylation){
   message("CpG set enrichment analysis using missMethyl::gometh...")
+  
+  message("      GO enrichment...")
   go_results <- gometh(
     sig.cpg = gene_list,          # Vector of significant CpG IDs
     all.cpg = univers_list,          # Vector of background CpGs (the universe)
@@ -77,20 +79,7 @@ if(methylation){
     sig.genes = T
   )
   
-  go_results$GeneRatio <- go_results$DE/length(gene_list)
-  go_results$BgRatio <- go_results$N/length(univers_list)
-  go_results_BP <- go_results[(!is.na(go_results$ONTOLOGY)) & (go_results$ONTOLOGY == "BP"),]
-  go_results_MF <- go_results[(!is.na(go_results$ONTOLOGY)) & (go_results$ONTOLOGY == "MF"),]
-  go_results_CC <- go_results[(!is.na(go_results$ONTOLOGY)) & (go_results$ONTOLOGY == "CC"),]
-  
-  message("Generating plots...")
-  plot.BP <- gometh_dotplot(gometh_res = go_results_BP , showCategory = 20,
-                            plot.title = "Top 20 GO Biological Process enrichment results" )
-  plot.MF <- gometh_dotplot(gometh_res = go_results_MF , showCategory = 20 ,
-                            plot.title = "Top 20 GO Molecular Function enrichment results")
-  plot.CC <- gometh_dotplot(gometh_res = go_results_CC , showCategory = 20,
-                            plot.title = "Top 20 GO Cellular Component enrichment results" )
-  
+  message("      KEGG enrichment...")
   kegg_results <- gometh(
     sig.cpg = gene_list,
     all.cpg = univers_list,
@@ -99,6 +88,20 @@ if(methylation){
     prior.prob = TRUE,
     sig.genes = T
   )
+  
+  go_results$GeneRatio <- go_results$DE/length(gene_list)
+  go_results$BgRatio <- go_results$N/length(univers_list)
+  go_results_BP <- go_results[(!is.na(go_results$ONTOLOGY)) & (go_results$ONTOLOGY == "BP"),]
+  go_results_MF <- go_results[(!is.na(go_results$ONTOLOGY)) & (go_results$ONTOLOGY == "MF"),]
+  go_results_CC <- go_results[(!is.na(go_results$ONTOLOGY)) & (go_results$ONTOLOGY == "CC"),]
+  
+  message("      Generating plots...")
+  plot.BP <- gometh_dotplot(gometh_res = go_results_BP , showCategory = 20,
+                            plot.title = "Top 20 GO Biological Process enrichment results" )
+  plot.MF <- gometh_dotplot(gometh_res = go_results_MF , showCategory = 20 ,
+                            plot.title = "Top 20 GO Molecular Function enrichment results")
+  plot.CC <- gometh_dotplot(gometh_res = go_results_CC , showCategory = 20,
+                            plot.title = "Top 20 GO Cellular Component enrichment results" )
   
   kegg_results$GeneRatio <- kegg_results$DE/length(gene_list)
   kegg_results$BgRatio <- kegg_results$N/length(univers_list)
@@ -127,6 +130,7 @@ if(!methylation){
       gene_list_entrez <- gene_list
     }
     
+    message("      GO enrichment...")
     go_results <- enrichGO(
       gene          = gene_list_entrez,
       OrgDb         = org.Hs.eg.db,
@@ -139,6 +143,20 @@ if(!methylation){
       maxGSSize = 500,
       readable      = TRUE,         # Converts Entrez IDs back to symbols in the output table
       pool = F
+    )
+    
+    message("      KEGG enrichment...")
+    kegg_results <- enrichKEGG(
+      gene          = gene_list_entrez,
+      organism      = "hsa",       # "hsa" stands for Homo sapiens
+      keyType = "kegg",
+      pvalueCutoff = 0.05,
+      pAdjustMethod = "BH",
+      universe = univers_list,
+      minGSSize = 10,
+      maxGSSize = 500,
+      qvalueCutoff = 0.2,
+      use_internal_data = F   #FALSE: use latest online db. TRUE: use KEGG.db package
     )
     
     go_results_BP <- go_results |> filter(ONTOLOGY == "BP")
@@ -169,18 +187,6 @@ if(!methylation){
     go_results_MF <- as.data.frame(go_results_MF@result)
     go_results_CC <- as.data.frame(go_results_CC@result)
     
-    kegg_results <- enrichKEGG(
-      gene          = gene_list_entrez,
-      organism      = "hsa",       # "hsa" stands for Homo sapiens
-      keyType = "kegg",
-      pvalueCutoff = 0.05,
-      pAdjustMethod = "BH",
-      universe = univers_list,
-      minGSSize = 10,
-      maxGSSize = 500,
-      qvalueCutoff = 0.2,
-      use_internal_data = F   #FALSE: use latest online db. TRUE: use KEGG.db package
-    )
     plot.KEGG <- dotplot(kegg_results , 
                          x = "GeneRatio",
                          color = "p.adjust",
