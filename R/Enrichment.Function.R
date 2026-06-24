@@ -34,6 +34,13 @@ gometh_dotplot <- function(gometh_res,
   }
   
   # 4. Format Labels (Wrap long text strings)
+  if(!("TERM" %in% colnames(plot_data))){
+    if(!("Description" %in% colnames(plot_data))){
+      stop("There is no 'TERM' or 'Description' column in gometh_res!")
+    }else{
+      plot_data$TERM <- plot_data$Description
+    }
+  }
   plot_data <- plot_data |>
     mutate(WrappedTERM = stringr::str_wrap(TERM, width = label_format))
   
