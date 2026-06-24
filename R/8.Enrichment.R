@@ -17,7 +17,7 @@ message("      Genes/Probes ID type (entrez, symbol, ensembl or cpg): " , ID_typ
 message("      Module Membesrhip threshold for selecting hub genes/probes: " , MM)
 message("      Module Membesrhip P-value threshold for selecting hub genes/probes: " , MM_pval)
 message("      Gene significance threshold for selecting hub genes/probes: " , GS)
-message("      Gene significance P-value threshold threshold for selecting hub genes/probes: " , MM)
+message("      Gene significance P-value threshold threshold for selecting hub genes/probes: " , GS_pval)
 message("      Output files prefix: " , out_prefix)
 #############################################################################
 message("")
@@ -46,7 +46,7 @@ suppressPackageStartupMessages({
   library(dplyr)
 })
 
-source(paste0(sys.script(),"/Enrichment.Function.R"))
+source(paste0(dirname(sys.script()),"/Enrichment.Function.R"))
 dir.create(dirname(out_prefix) , recursive = T)
 
 message("Reading inputs...")
