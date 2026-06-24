@@ -9,6 +9,19 @@ GS <- as.numeric(trimws(argument[6]))
 GS_pval <- as.numeric(trimws(argument[7]))
 out_prefix <- trimws(argument[8])
 
+############################################################################
+message("Input arguments:")
+message("      Module Membesrhip and Gene Significance file: " , MM_GS_file)
+message("      WGCNA network file: " , Net_file)
+message("      Genes/Probes ID type (entrez, symbol, ensembl or cpg): " , ID_type)
+message("      Module Membesrhip threshold for selecting hub genes/probes: " , MM)
+message("      Module Membesrhip P-value threshold for selecting hub genes/probes: " , MM_pval)
+message("      Gene significance threshold for selecting hub genes/probes: " , GS)
+message("      Gene significance P-value threshold threshold for selecting hub genes/probes: " , MM)
+message("      Output files prefix: " , out_prefix)
+#############################################################################
+message("")
+
 message("Loading required packages...")
 
 if(!(ID_type %in% c("entrz","symbol","cpg","enseble"))){
@@ -34,6 +47,7 @@ suppressPackageStartupMessages({
 })
 
 source(paste0(sys.script(),"/Enrichment.Function.R"))
+dir.create(dirname(out_prefix) , recursive = T)
 
 message("Reading inputs...")
 MM_GS <- read.csv(MM_GS_file , stringsAsFactors = F)
