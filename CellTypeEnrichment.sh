@@ -33,6 +33,8 @@
 
 MM_GS_file="./module23.MM.GS.csv"
 Net_file="./WGCNA.Net.rds"
+ref_10x_dir="ROSMAP/SCP"
+sample_cellType_file="ROSMAP_metadata.csv"
 id_type="cpg"                 
 MM=0.8
 MM_pval=1
@@ -43,5 +45,5 @@ out_prefix="./Results/WGCNA/Enrichment/module23"
 ScriptDir="./WGCNA/"
 #########################################################################
 
-Rscript "$ScriptDir"/R/8.Enrichment.R "$MM_GS_file" "$Net_file" "$id_type" "$MM" "$MM_pval" "$GS" "$GS_pval" "$out_prefix"
+Rscript "$ScriptDir"/R/CellTypeEnrichment.R "$MM_GS_file" "$Net_file" "$id_type" "$MM" "$MM_pval" "$GS" "$GS_pval" "$out_prefix"
 

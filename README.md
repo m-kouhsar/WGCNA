@@ -58,10 +58,10 @@ You can optionally adjust for confounders by specifying `Cofounders_num` for num
 
 A `csv` file will be saved for each module, containing MM and GS values along with their corresponding p-values. These files can be used to identify hub genes/CpGs within the modules for downstream analyses.
 
-### Step 8: Enrichment Analysis
+### Step 8: Gene Set Enrichment Analysis
 
 After running Module Membership analysis, for each selected module, you would have a `csv` file contains MM and GS values and their corresponding P-values. 
-You can use `8.Enrichment.sh` script to select hub genes/probes in your selected module and run a KEGG and GO enrichment analysis. 
+You can use `8.GeneSetEnrichment.sh` script to select hub genes/probes in your selected module and run a KEGG and GO enrichment analysis. 
 
 ## Other Available Scripts
 
@@ -73,3 +73,4 @@ Some additional `R` and `bash` scripts are also available. For example:
 * `WGCNA.ModulePreservation.sh` for module preservation analysis and visualization.
 * `ME.box.plot.R` for creating box plots based on Module Eigengenes and trait variables in one or two datasets (see [Figure 2C](https://alz-journals.onlinelibrary.wiley.com/cms/asset/62e080f4-55ea-4b2d-a90b-af5e16b4198f/alz14501-fig-0002-m.jpg)).
 * `Merged.ModuleMembershipPlot.R` for visualizing MM vs. GS relationships within a module across two different datasets in a single scatter plot (see [Figure 2D](https://alz-journals.onlinelibrary.wiley.com/cms/asset/62e080f4-55ea-4b2d-a90b-af5e16b4198f/alz14501-fig-0002-m.jpg)).
+* `CellTypeEnrichment.sh` for running a cell type enrichment analysis using [EWCE](https://nathanskene.github.io/EWCE/) package and a refernce single cell data. 

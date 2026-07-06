@@ -207,10 +207,10 @@ print(plot.MF)
 print(plot.CC)
 graphics.off()
 
-write.csv(kegg_results , file = paste0(out_prefix , "Enrichment.KEGG.csv"))
-write.csv(go_results_BP , file = paste0(out_prefix , "Enrichment.BP.csv"))
-write.csv(go_results_MF , file = paste0(out_prefix , "Enrichment.MF.csv"))
-write.csv(go_results_CC , file = paste0(out_prefix , "Enrichment.CC.csv"))
+write.csv(kegg_results , file = paste0(out_prefix , ".Enrichment.KEGG.csv"))
+write.csv(go_results_BP , file = paste0(out_prefix , ".Enrichment.BP.csv"))
+write.csv(go_results_MF , file = paste0(out_prefix , ".Enrichment.MF.csv"))
+write.csv(go_results_CC , file = paste0(out_prefix , ".Enrichment.CC.csv"))
 
 
 
