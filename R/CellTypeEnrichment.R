@@ -2,17 +2,28 @@ argument <- commandArgs(T)
 
 MM_GS_file <- trimws(argument[1])
 Net_file <- trimws(argument[2])
-ID_type <- trimws(argument[3])                #entrez,symbol,cpg,ensembl
-MM <- as.numeric(trimws(argument[4]))
-MM_pval <- as.numeric(trimws(argument[5]))
-GS <- as.numeric(trimws(argument[6]))
-GS_pval <- as.numeric(trimws(argument[7]))
-out_prefix <- trimws(argument[8])
+ref_10x_dir <- trimws(argument[3])
+sample_cellType_file <- trimws(argument[4])
+ID_type <- trimws(argument[5])                #entrez,symbol,cpg,ensembl
+MM <- as.numeric(trimws(argument[6]))
+MM_pval <- as.numeric(trimws(argument[7]))
+GS <- as.numeric(trimws(argument[8]))
+GS_pval <- as.numeric(trimws(argument[9]))
+out_prefix <- trimws(argument[10])
 
+rep_ <- 1000
+n_cores <- parallel::detectCores()
+if(Sys.info()["sysname"] == "Windows"){
+  n_cores <- 1 #in Windows EWCE does not support parallel computing
+}
+set.seed(123456)
+dir.create(dirname(out_prefix))
 ############################################################################
 message("Input arguments:")
 message("      Module Membesrhip and Gene Significance file: " , MM_GS_file)
 message("      WGCNA network file: " , Net_file)
+message("      Reference single cell data directory: " , ref_10x_dir)
+message("      Cell type information data file " , sample_cellType_file)
 message("      Genes/Probes ID type (entrez, symbol, ensembl or cpg): " , ID_type)
 message("      Module Membesrhip threshold for selecting hub genes/probes: " , MM)
 message("      Module Membesrhip P-value threshold for selecting hub genes/probes: " , MM_pval)
@@ -22,31 +33,38 @@ message("      Output files prefix: " , out_prefix)
 #############################################################################
 message("")
 
-message("Loading required packages...")
-
 if(!(ID_type %in% c("entrz","symbol","cpg","enseble"))){
   stop("ID type must be one of the following values:\n entrez,symbol,cpg,ensembl")
 }
+
+message("Loading required packages...")
+
+
 methylation <- ifelse(tolower(ID_type) == "cpg" , T , F)
 
+suppressPackageStartupMessages({
+  library(EWCE)
+  library(Seurat)
+  library(SummarizedExperiment)
+  library(ggplot2)
+  library(cowplot)
+  library(parallel)
+  
+})
 if(methylation){
-  suppressPackageStartupMessages(library(missMethyl))
+  suppressPackageStartupMessages({
+    library(minfi)
+    library(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
+    })
 }
 
 if(!methylation){
   suppressPackageStartupMessages({
-    library(clusterProfiler)
     library(org.Hs.eg.db)
-    library(enrichplot)
+    library(clusterProfiler)
   })
 }
-suppressPackageStartupMessages({
-  library(funr)
-  library(ggplot2)  
-  library(dplyr)
-})
 
-source(paste0(dirname(sys.script()),"/Enrichment.Function.R"))
 dir.create(dirname(out_prefix) , recursive = T)
 
 message("Reading inputs...")
@@ -67,150 +85,117 @@ if(length(gene_list) == 0){
 univers_list <- names(net$colors)
 
 if(methylation){
-  message("CpG set enrichment analysis using missMethyl::gometh...")
+  message("Mapping CpGs to genes using Illumina annotation data (hg19)...")
   
-  message("      GO enrichment...")
-  go_results <- gometh(
-    sig.cpg = gene_list,          # Vector of significant CpG IDs
-    all.cpg = univers_list,          # Vector of background CpGs (the universe)
-    collection = "GO",           # Specify "GO" or "KEGG"
-    array.type = "EPIC",         # Change to "450K" if using older arrays
-    prior.prob = TRUE  ,          # Adjusts for the varying number of CpGs per gene
-    sig.genes = T
-  )
+  annot_all <- data.frame( minfi::getAnnotation(IlluminaHumanMethylationEPICanno.ilm10b4.hg19))
+  gene_symbol <- annot_all$UCSC_RefGene_Name[annot_all$Name %in% gene_list]
+  gene_symbol <- gene_symbol[!is.na(gene_symbol)]
+  gene_symbol <- gene_symbol[gene_symbol != ""]
+  gene_symbol <- unique(unlist(strsplit(gene_symbol,";")))
   
-  message("      KEGG enrichment...")
-  kegg_results <- gometh(
-    sig.cpg = gene_list,
-    all.cpg = univers_list,
-    collection = "KEGG",
-    array.type = "EPIC",
-    prior.prob = TRUE,
-    sig.genes = T
-  )
-  
-  go_results$GeneRatio <- go_results$DE/length(gene_list)
-  go_results$BgRatio <- go_results$N/length(univers_list)
-  go_results_BP <- go_results[(!is.na(go_results$ONTOLOGY)) & (go_results$ONTOLOGY == "BP"),]
-  go_results_MF <- go_results[(!is.na(go_results$ONTOLOGY)) & (go_results$ONTOLOGY == "MF"),]
-  go_results_CC <- go_results[(!is.na(go_results$ONTOLOGY)) & (go_results$ONTOLOGY == "CC"),]
-  
-  message("      Generating plots...")
-  plot.BP <- gometh_dotplot(gometh_res = go_results_BP , showCategory = 20,
-                            plot.title = "Top 20 GO Biological Process enrichment results" )
-  plot.MF <- gometh_dotplot(gometh_res = go_results_MF , showCategory = 20 ,
-                            plot.title = "Top 20 GO Molecular Function enrichment results")
-  plot.CC <- gometh_dotplot(gometh_res = go_results_CC , showCategory = 20,
-                            plot.title = "Top 20 GO Cellular Component enrichment results" )
-  
-  kegg_results$GeneRatio <- kegg_results$DE/length(gene_list)
-  kegg_results$BgRatio <- kegg_results$N/length(univers_list)
-  
-  plot.KEGG <- gometh_dotplot(gometh_res = kegg_results , showCategory = 20,
-                              plot.title = "Top 20 KEGG enrichment results")
+  univers_symbol <- annot_all$UCSC_RefGene_Name[annot_all$Name %in% univers_list]
+  univers_symbol <- univers_symbol[!is.na(univers_symbol)]
+  univers_symbol <- univers_symbol[univers_symbol != ""]
+  univers_symbol <- unique(unlist(strsplit(univers_symbol,";")))
   
 }
 
 if(!methylation){
-  message("Gene set enrichment analysis using clusterprofiler...")
   
-  if(ID_type == "symbol"){
-    gene_list_entrez <- clusterProfiler::bitr(
+  if(ID_type == "entrez"){
+    
+    message("Converting gene ENTREZ ids to gene symbol...")
+    gene_symbol <- clusterProfiler::bitr(
       gene_list, 
-      fromType = "SYMBOL", 
-      toType   = "ENTREZID", 
+      fromType = "ENTREZID", 
+      toType   = "SYMBOL", 
       OrgDb    = org.Hs.eg.db)
+    univers_symbol <- clusterProfiler::bitr(
+      univers_list, 
+      fromType = "ENTREZID", 
+      toType   = "SYMBOL", 
+      OrgDb    = org.Hs.eg.db)
+    
     }else if(ID_type == "ensembl"){
-      gene_list_entrez <- clusterProfiler::bitr(
+      
+      message("Converting gene ensembl ids to gene symbol...")
+      gene_symbol <- clusterProfiler::bitr(
         gene_list, 
         fromType = "ENSEMBL",    # Current format
-        toType   = "ENTREZID",   # Desired format
+        toType   = "SYMBOL",   # Desired format
         OrgDb    = org.Hs.eg.db
       )
-    }else{
-      gene_list_entrez <- gene_list
+      univers_symbol <- clusterProfiler::bitr(
+        univers_list, 
+        fromType = "ENSEMBL",    # Current format
+        toType   = "SYMBOL",   # Desired format
+        OrgDb    = org.Hs.eg.db
+      )
     }
-    
-    message("      GO enrichment...")
-    go_results <- enrichGO(
-      gene          = gene_list_entrez,
-      OrgDb         = org.Hs.eg.db,
-      ont           = "ALL",       # "BP" (Biological Process), "MF", "CC", or "ALL"
-      pAdjustMethod = "BH", 
-      universe = univers_list,     # Benjamini-Hochberg FDR correction
-      pvalueCutoff  = 0.05,
-      qvalueCutoff  = 0.2,
-      minGSSize = 10,
-      maxGSSize = 500,
-      readable      = TRUE,         # Converts Entrez IDs back to symbols in the output table
-      pool = F
-    )
-    
-    message("      KEGG enrichment...")
-    kegg_results <- enrichKEGG(
-      gene          = gene_list_entrez,
-      organism      = "hsa",       # "hsa" stands for Homo sapiens
-      keyType = "kegg",
-      pvalueCutoff = 0.05,
-      pAdjustMethod = "BH",
-      universe = univers_list,
-      minGSSize = 10,
-      maxGSSize = 500,
-      qvalueCutoff = 0.2,
-      use_internal_data = F   #FALSE: use latest online db. TRUE: use KEGG.db package
-    )
-    
-    go_results_BP <- go_results |> filter(ONTOLOGY == "BP")
-    go_results_MF <- go_results |> filter(ONTOLOGY == "MF")
-    go_results_CC <- go_results |> filter(ONTOLOGY == "CC")
-    
-    message("Generating plots...")
-    plot.BP <- dotplot(go_results_BP , 
-                       x = "GeneRatio",
-                       color = "p.adjust",
-                       showCategory = 20, 
-                       title="Top 20 GO Biological Process enrichment results"
-                      )
-    plot.MF <- dotplot(go_results_MF , 
-                       x = "GeneRatio",
-                       color = "p.adjust",
-                       showCategory = 20, 
-                       title="Top 20 GO Molecular Function enrichment results"
-                      )
-    plot.CC <- dotplot(go_results_CC , 
-                       x = "GeneRatio",
-                       color = "p.adjust",
-                       showCategory = 20, 
-                       title="Top 20 GO Cellular Component enrichment results"
-                      )
-    
-    go_results_BP <- as.data.frame(go_results_BP@result)
-    go_results_MF <- as.data.frame(go_results_MF@result)
-    go_results_CC <- as.data.frame(go_results_CC@result)
-    
-    plot.KEGG <- dotplot(kegg_results , 
-                         x = "GeneRatio",
-                         color = "p.adjust",
-                         showCategory = 20, 
-                         title="Top 20 KEGG enrichment results"
-                         )
-    
-    kegg_results <- as.data.frame(kegg_results@result)
     
 }
 
+message("Reading the single cell reference data...")
+
+if(!file.exists(paste0(out_prefix,"_EWCERef.rda"))){
+  
+  sample_cellType <- read.csv(sample_cellType_file , stringsAsFactors = F)
+  if(!all(c("broad.cell.type","Subcluster") %in% colnames(sample_cellType))){
+    stop("sample_cellType_file must contains the following columns:
+         'broad.cell.type'
+         'Subcluster'")
+  }
+  sce <- Seurat::Read10X(ref_10x_dir, gene.column = 1)
+  
+  message("      [1]: Removing bad HGNC symbols in reference data...")
+  sce1 <- fix_bad_hgnc_symbols(sce)
+  
+  message("      [2]: Droping uninformative genes...")
+  sce2 <- drop_uninformative_genes(sce1, drop_nonhuman_genes=T , input_species = "human" ,output_species = "human" , 
+                                   level2annot = sample_cellType$Subcluster, no_cores = n_cores)
+  
+  message("      [3]: Generating cell type dataset in approperiate format...\n")
+  
+  
+  annotLevels = list(level1class=sample_cellType$broad.cell.type,
+                     level2class= sample_cellType$Subcluster)
+  ctd_file <- generate_celltype_data(exp=sce2,
+                                     annotLevels=annotLevels,
+                                     groupName="EWCERef",
+                                     savePath=dirname(out_prefix), 
+                                     file_prefix = basename(out_prefix),
+                                     no_cores = n_cores) 
+}
+
+ctd <- EWCE::load_rdata(ctd_file)
+
+message("Cell type enrichment analysis...")
+result<- EWCE::bootstrap_enrichment_test(
+  sct_data = ctd,
+  hits = gene_symbol,
+  bg = univers_symbol,
+  sctSpecies = "human",
+  genelistSpecies = "human",
+  reps = rep_,
+  annotLevel = 1, no_cores = n_cores)
+
+p_ctd <- EWCE::plot_ctd(ctd = ctd , genes = gene_symbol[1:5],level = 1,metric = "specificity",show_plot = F)+
+  ggtitle("EWCE Reference Dataset")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 45,hjust = 1))
+
+p_result <- EWCE::ewce_plot(result$results)[[1]] +
+  ggtitle("EWCE Cell Type Enrichment Result")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 45,hjust = 1))
+
 message("Saving results...")
-pdf(paste0(out_prefix , ".Enrichment.pdf"))
-print(plot.KEGG)
-print(plot.BP)
-print(plot.MF)
-print(plot.CC)
+pdf(paste0(out_prefix , ".EWCE.pdf"))
+print(p_ctd)
+print(p_result)
 graphics.off()
 
-write.csv(kegg_results , file = paste0(out_prefix , ".Enrichment.KEGG.csv"))
-write.csv(go_results_BP , file = paste0(out_prefix , ".Enrichment.BP.csv"))
-write.csv(go_results_MF , file = paste0(out_prefix , ".Enrichment.MF.csv"))
-write.csv(go_results_CC , file = paste0(out_prefix , ".Enrichment.CC.csv"))
-
+save(result , file = paste0(out_prefix , "EWCE.rdat"))
+write.csv(result$results , file = paste(out_prefix , ".EWCE.csv") , row.names = F)
 
 

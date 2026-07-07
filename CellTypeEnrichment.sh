@@ -14,13 +14,17 @@
 ################################# Argument description ##################################################
 
 # MM_GS_file: Module Membership and Gene Significance csv file (for an specific module) obtained from step 7. This is a csv file contains the following columns:
-#				ID:         Gene or probe ID
+#				      ID:         Gene or probe ID
 #           	MM:         Module Membership value
-#               MM.Pval:    Module Membership P-value
+#             MM.Pval:    Module Membership P-value
 #           	GS:         Gene Significance
 #           	GS.Pval:    Gene Significance P-value
 #
 # Net_file:   WGCNA network opbject file in rds format. This is the results of step 5
+# ref_10x_dir: The reference single cell data directory contains barcodes.tsv, genes.tsv and matrix.mtx
+# sample_cellType_file: A csv file shows cell type infromation per sample and must contains the following columns (NOT case sensitive):
+#                       broad.cell.type:  level 1 cell type per sample
+#                       Subcluster:       level 2 cell types per sample 
 # id_type:    gene/probe id type. can be 'cpg' for methylation data and CpG IDs and 'entrez','symbol' or 'ensembl' for expression data
 # MM:         Module Membership threshold for selecting hub genes
 # MM_pval:    Module Membership P-value threshold for selecting hub genes

@@ -22,11 +22,12 @@ message("      Output files prefix: " , out_prefix)
 #############################################################################
 message("")
 
-message("Loading required packages...")
-
 if(!(ID_type %in% c("entrz","symbol","cpg","enseble"))){
   stop("ID type must be one of the following values:\n entrez,symbol,cpg,ensembl")
 }
+
+message("Loading required packages...")
+
 methylation <- ifelse(tolower(ID_type) == "cpg" , T , F)
 
 if(methylation){
@@ -120,6 +121,13 @@ if(!methylation){
       fromType = "SYMBOL", 
       toType   = "ENTREZID", 
       OrgDb    = org.Hs.eg.db)
+    
+    univers_list_entrez <- clusterProfiler::bitr(
+      univers_list, 
+      fromType = "SYMBOL", 
+      toType   = "ENTREZID", 
+      OrgDb    = org.Hs.eg.db)
+    
     }else if(ID_type == "ensembl"){
       gene_list_entrez <- clusterProfiler::bitr(
         gene_list, 
@@ -127,8 +135,17 @@ if(!methylation){
         toType   = "ENTREZID",   # Desired format
         OrgDb    = org.Hs.eg.db
       )
+      
+      univers_list_entrez <- clusterProfiler::bitr(
+        univers_list, 
+        fromType = "ENSEMBL",    # Current format
+        toType   = "ENTREZID",   # Desired format
+        OrgDb    = org.Hs.eg.db
+      )
+      
     }else{
       gene_list_entrez <- gene_list
+      univers_list_entrez <- univers_list
     }
     
     message("      GO enrichment...")
@@ -137,7 +154,7 @@ if(!methylation){
       OrgDb         = org.Hs.eg.db,
       ont           = "ALL",       # "BP" (Biological Process), "MF", "CC", or "ALL"
       pAdjustMethod = "BH", 
-      universe = univers_list,     # Benjamini-Hochberg FDR correction
+      universe = univers_list_entrez,     # Benjamini-Hochberg FDR correction
       pvalueCutoff  = 0.05,
       qvalueCutoff  = 0.2,
       minGSSize = 10,
@@ -153,7 +170,7 @@ if(!methylation){
       keyType = "kegg",
       pvalueCutoff = 0.05,
       pAdjustMethod = "BH",
-      universe = univers_list,
+      universe = univers_list_entrez,
       minGSSize = 10,
       maxGSSize = 500,
       qvalueCutoff = 0.2,
