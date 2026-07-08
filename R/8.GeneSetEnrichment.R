@@ -13,11 +13,11 @@ out_prefix <- trimws(argument[8])
 message("Input arguments:")
 message("      Module Membesrhip and Gene Significance file: " , MM_GS_file)
 message("      WGCNA network file: " , Net_file)
-message("      Genes/Probes ID type (entrez, symbol, ensembl or cpg): " , ID_type)
-message("      Module Membesrhip threshold for selecting hub genes/probes: " , MM)
-message("      Module Membesrhip P-value threshold for selecting hub genes/probes: " , MM_pval)
-message("      Gene significance threshold for selecting hub genes/probes: " , GS)
-message("      Gene significance P-value threshold threshold for selecting hub genes/probes: " , GS_pval)
+message("      Genes ID type (entrez, symbol, ensembl or cpg): " , ID_type)
+message("      Module Membesrhip threshold for selecting hub genes: " , MM)
+message("      Module Membesrhip P-value threshold for selecting hub genes: " , MM_pval)
+message("      Gene significance threshold for selecting hub genes: " , GS)
+message("      Gene significance P-value threshold threshold for selecting hub genes: " , GS_pval)
 message("      Output files prefix: " , out_prefix)
 #############################################################################
 message("")
@@ -60,9 +60,9 @@ gene_list <- MM_GS$ID[(MM_GS$MM > MM) &
                         (MM_GS$GS.Pval < GS_pval)]
 
 if(length(gene_list) == 0){
-  stop("No gene/probe passed the specified cutoffs.")
+  stop("No gene passed the specified cutoffs.")
 }else{
-  message(length(gene_list)," genes/probes passed the specified cutoffs.")
+  message(length(gene_list),"/",nrow(MM_GS)," genes passed the specified cutoffs.")
 }
 
 univers_list <- names(net$colors)
@@ -217,17 +217,17 @@ if(!methylation){
 }
 
 message("Saving results...")
-pdf(paste0(out_prefix , ".Enrichment.pdf"))
+pdf(paste0(out_prefix , ".GSE.pdf"))
 print(plot.KEGG)
 print(plot.BP)
 print(plot.MF)
 print(plot.CC)
 graphics.off()
 
-write.csv(kegg_results , file = paste0(out_prefix , ".Enrichment.KEGG.csv"))
-write.csv(go_results_BP , file = paste0(out_prefix , ".Enrichment.BP.csv"))
-write.csv(go_results_MF , file = paste0(out_prefix , ".Enrichment.MF.csv"))
-write.csv(go_results_CC , file = paste0(out_prefix , ".Enrichment.CC.csv"))
+write.csv(kegg_results , file = paste0(out_prefix , ".GSE.KEGG.csv"))
+write.csv(go_results_BP , file = paste0(out_prefix , ".GSE.BP.csv"))
+write.csv(go_results_MF , file = paste0(out_prefix , ".GSE.MF.csv"))
+write.csv(go_results_CC , file = paste0(out_prefix , ".GSE.CC.csv"))
 
 
 

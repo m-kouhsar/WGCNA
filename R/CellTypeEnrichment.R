@@ -1,3 +1,31 @@
+unlockBinding("check_species", asNamespace("EWCE"))
+
+assign(
+  "check_species",
+  function(genelistSpecies = NULL,
+           sctSpecies = NULL,
+           sctSpecies_origin = "human",
+           sctSpecies_origin_default = "human",
+           verbose = TRUE) {
+    
+    if (is.null(genelistSpecies))
+      genelistSpecies <- "human"
+    
+    if (is.null(sctSpecies))
+      sctSpecies <- "mouse"
+    
+    if (is.null(sctSpecies_origin))
+      sctSpecies_origin <- sctSpecies_origin_default
+    
+    return(list(
+      genelistSpecies = genelistSpecies,
+      sctSpecies = sctSpecies,
+      sctSpecies_origin = sctSpecies_origin
+    ))
+  },
+  envir = asNamespace("EWCE")
+)
+################################################################
 argument <- commandArgs(T)
 
 MM_GS_file <- trimws(argument[1])
@@ -77,9 +105,9 @@ gene_list <- MM_GS$ID[(MM_GS$MM > MM) &
                         (MM_GS$GS.Pval < GS_pval)]
 
 if(length(gene_list) == 0){
-  stop("No gene/probe passed the specified cutoffs.")
+  stop("No gene passed the specified cutoffs.")
 }else{
-  message(length(gene_list)," genes/probes passed the specified cutoffs.")
+  message(length(gene_list),"/",nrow(MM_GS)," genes passed the specified cutoffs.")
 }
 
 univers_list <- names(net$colors)
@@ -93,11 +121,12 @@ if(methylation){
   gene_symbol <- gene_symbol[gene_symbol != ""]
   gene_symbol <- unique(unlist(strsplit(gene_symbol,";")))
   
+  message(length(gene_symbol) , " genes found in the test gene set.")
   univers_symbol <- annot_all$UCSC_RefGene_Name[annot_all$Name %in% univers_list]
   univers_symbol <- univers_symbol[!is.na(univers_symbol)]
   univers_symbol <- univers_symbol[univers_symbol != ""]
   univers_symbol <- unique(unlist(strsplit(univers_symbol,";")))
-  
+  message(length(univers_symbol) , " genes found in the background gene set.")
 }
 
 if(!methylation){
@@ -137,7 +166,7 @@ if(!methylation){
 
 message("Reading the single cell reference data...")
 
-if(!file.exists(paste0(out_prefix,"_EWCERef.rda"))){
+if(!file.exists(paste0(ref_10x_dir,"_EWCERef.rda"))){
   
   sample_cellType <- read.csv(sample_cellType_file , stringsAsFactors = F)
   if(!all(c("broad.cell.type","Subcluster") %in% colnames(sample_cellType))){
@@ -147,14 +176,15 @@ if(!file.exists(paste0(out_prefix,"_EWCERef.rda"))){
   }
   sce <- Seurat::Read10X(ref_10x_dir, gene.column = 1)
   
-  message("      [1]: Removing bad HGNC symbols in reference data...")
+  message("[1]: Removing bad HGNC symbols in reference data...")
   sce1 <- fix_bad_hgnc_symbols(sce)
   
-  message("      [2]: Droping uninformative genes...")
-  sce2 <- drop_uninformative_genes(sce1, drop_nonhuman_genes=T , input_species = "human" ,output_species = "human" , 
+  message("[2]: Droping uninformative genes...")
+  sce2 <- drop_uninformative_genes(sce1, drop_nonhuman_genes=T , input_species = "human" ,
+                                   output_species = "human" , sctSpecies_origin_default = "human",
                                    level2annot = sample_cellType$Subcluster, no_cores = n_cores)
   
-  message("      [3]: Generating cell type dataset in approperiate format...\n")
+  message("[3]: Generating cell type dataset in approperiate format...")
   
   
   annotLevels = list(level1class=sample_cellType$broad.cell.type,
@@ -162,11 +192,14 @@ if(!file.exists(paste0(out_prefix,"_EWCERef.rda"))){
   ctd_file <- generate_celltype_data(exp=sce2,
                                      annotLevels=annotLevels,
                                      groupName="EWCERef",
-                                     savePath=dirname(out_prefix), 
-                                     file_prefix = basename(out_prefix),
+                                     savePath=ref_10x_dir, 
+                                     file_prefix = "",
                                      no_cores = n_cores) 
+}else{
+  ctd_file <- paste0(ref_10x_dir,"_EWCERef.rda")
 }
 
+message("Loading reference data...")
 ctd <- EWCE::load_rdata(ctd_file)
 
 message("Cell type enrichment analysis...")
@@ -195,7 +228,7 @@ print(p_ctd)
 print(p_result)
 graphics.off()
 
-save(result , file = paste0(out_prefix , "EWCE.rdat"))
+save(result , file = paste0(out_prefix , ".EWCE.rdat"))
 write.csv(result$results , file = paste(out_prefix , ".EWCE.csv") , row.names = F)
 
 

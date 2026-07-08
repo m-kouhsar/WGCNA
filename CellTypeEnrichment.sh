@@ -49,5 +49,5 @@ out_prefix="./Results/WGCNA/Enrichment/module23"
 ScriptDir="./WGCNA/"
 #########################################################################
 
-Rscript "$ScriptDir"/R/CellTypeEnrichment.R "$MM_GS_file" "$Net_file" "$id_type" "$MM" "$MM_pval" "$GS" "$GS_pval" "$out_prefix"
+Rscript "$ScriptDir"/R/CellTypeEnrichment.R "$MM_GS_file" "$Net_file" "$ref_10x_dir" "$sample_cellType_file" "$id_type" "$MM" "$MM_pval" "$GS" "$GS_pval" "$out_prefix"
 
