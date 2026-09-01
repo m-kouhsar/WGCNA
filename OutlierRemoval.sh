@@ -14,7 +14,7 @@ pheno_file=./phenotype.csv
 outliers=sample1,sample2,sample3
 out_prefix=./Results/Methylation.Cohort1
 
-ScriptDir=./WGCNS
+ScriptDir=./WGCNA
 ##########################################################################
 
 Rscript "${ScriptDir}"/R/OutlierRemoval.R "$expr_file" "$pheno_file" "$outliers" "$out_prefix"
