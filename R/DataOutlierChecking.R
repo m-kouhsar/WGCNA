@@ -56,6 +56,10 @@ if(!identical(colnames(expr_mat) , rownames(pheno))){
 var.fact <- trimws(str_split_1(var.fact , pattern = ","))
 var.num <- trimws(str_split_1(var.num , pattern = ","))
 
+if(!all(c(var.fact,var.num) %in% colnames(pheno))){
+  stop("Couldn't find the following variables in metadata:\n      ",
+       paste(setdiff(c(var.fact,var.num) , colnames(pheno)),collapse = "\t"))
+}
 pheno <- pheno[,c(var.fact,var.num)]
 
 rm_indx <- rep(TRUE ,length(var.fact))
