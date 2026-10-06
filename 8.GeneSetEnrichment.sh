@@ -14,9 +14,9 @@
 ################################# Argument description ##################################################
 
 # MM_GS_file: Module Membership and Gene Significance csv file (for an specific module) obtained from step 7. This is a csv file contains the following columns:
-#				ID:         Gene or probe ID
+#				      ID:         Gene or probe ID
 #           	MM:         Module Membership value
-#               MM.Pval:    Module Membership P-value
+#             MM.Pval:    Module Membership P-value
 #           	GS:         Gene Significance
 #           	GS.Pval:    Gene Significance P-value
 #
