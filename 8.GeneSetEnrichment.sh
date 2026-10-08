@@ -21,7 +21,7 @@
 #           	GS.Pval:    Gene Significance P-value
 #
 # Net_file:   WGCNA network opbject file in rds format. This is the results of step 5
-# id_type:    gene/probe id type. can be 'cpg' for methylation data and CpG IDs and 'entrez','symbol' or 'ensembl' for expression data
+# id_type:    gene/probe id type. can be 'cpg' for methylation data and 'entrez','symbol' or 'ensembl' for expression data
 # MM:         Module Membership threshold for selecting hub genes
 # MM_pval:    Module Membership P-value threshold for selecting hub genes
 # GS: Gene    Significance threshold for selecting hub genes

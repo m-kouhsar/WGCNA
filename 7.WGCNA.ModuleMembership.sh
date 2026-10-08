@@ -17,8 +17,8 @@
 # Pheno_file:                   Metadata in csv format
 # Trait:                        Trait variable (a column name in metadata)
 # Categorical_trait:            Set it to 'yes' if your trait is categorical (it will be used to calculate Gene Significance (GS) based on a linear regression analysis)
-# Cofounders_num:               Numerical cofounders you need to add to the lm model in GS calculation
-# Cofounders_cat:               Categorical cofounders you need to add to the lm model in GS calculation
+# Covariates_num:               Numerical Covariates you need to add to the lm model in GS calculation
+# Covariates_cat:               Categorical Covariates you need to add to the lm model in GS calculation
 # GS_legend_pvalue:             All genes/probes with GS P-value smaller than this threshold will be shown in deifferent color in module membership scatter plots.
 # GS_label_pvalue:              The genes/probes with GS P-value smaller than this threshold will be labeled by gene/probe IDs in module membership scatter plots.
 # Adjusted_pvalue_method:       The method to adjust Module Membership (MM) and GS P-values based on number of genes (all genes for GS and genes inside each module for MM).
@@ -35,8 +35,8 @@ Expr_file="./betas.rds"
 Pheno_file="./pheno.csv"
 Trait="Group"
 Categorical_trait="yes"
-Cofounders_num="Age,CellProportion"
-Cofounders_cat="Sex,Plate"
+Covariates_num="Age,CellProportion"
+Covariates_cat="Sex,Plate"
 GS_legend_pvalue=0.05
 GS_label_pvalue=1e-4
 Adjusted_pvalue_method="BH"
