@@ -5,8 +5,8 @@ expr_file <- trimws(arguments[2])
 pheno_file <- trimws(arguments[3])
 trait <- trimws(arguments[4])
 categorical_trait <- trimws(arguments[5])
-cofounders_num <- trimws(arguments[6])
-cofounders_cat <- trimws(arguments[7])
+covariates_num <- trimws(arguments[6])
+covariates_cat <- trimws(arguments[7])
 GS_legend_pvalue <- as.numeric(trimws(arguments[8]))
 GS_label_pvalue <- as.numeric(trimws(arguments[9]))
 adjusted_pvalue_method <- trimws(arguments[10])
@@ -20,8 +20,8 @@ message("      Expression file: ",expr_file)
 message("      Metadata file: ",pheno_file)
 message("      Trait variable: ",trait)
 message("      Is trait categorical? ",categorical_trait)
-message("      Categorical cofounders: ",cofounders_cat)
-message("      Numeric cofounders: ",cofounders_num)
+message("      Categorical cofounders: ",covariates_cat)
+message("      Numeric cofounders: ",covariates_num)
 message("      Gene Significance P-value threshold used for coloring genes in the scatter plot: ",GS_legend_pvalue)
 message("      Gene Significance P-value threshold used for labeling genes in the scatter plot: ",GS_label_pvalue)
 message("      Adjusted P-value method: ",adjusted_pvalue_method)
@@ -69,8 +69,8 @@ if(!(trait %in% colnames(pheno))){
 
 categorical_trait <- ifelse(tolower(categorical_trait) == "yes" , T , F)
 
-cofounders_num <- trimws(str_split_1(cofounders_num , pattern = ","))
-cofounders_cat <- trimws(str_split_1(cofounders_cat , pattern = ","))
+covariates_num <- trimws(str_split_1(covariates_num , pattern = ","))
+covariates_cat <- trimws(str_split_1(covariates_cat , pattern = ","))
 
 
 
@@ -88,16 +88,16 @@ if(!dir.exists(out_dir)){
   dir.create(out_dir , recursive = T)
 }
 
-for(v in cofounders_cat){
+for(v in covariates_cat){
   pheno[,v] <- as.factor(pheno[,v])
 }
 
-for(v in cofounders_num){
+for(v in covariates_num){
   pheno[,v] <- as.numeric(pheno[,v])
 }
 
 MM <- Module.Membership.Plot(net.colors = net$colors , expr.mat = expr , metadata = pheno , trait = trait , 
-                               categorical.trait = categorical_trait, cofounders = c(cofounders_num , cofounders_cat),
+                               categorical.trait = categorical_trait, cofounders = c(covariates_num , covariates_cat),
                              modules = modules,legend_GS_pval = GS_legend_pvalue , label_GS_pval = GS_label_pvalue , 
                              p.adjust.method = adjusted_pvalue_method , soft.power = softPow)
 message("")

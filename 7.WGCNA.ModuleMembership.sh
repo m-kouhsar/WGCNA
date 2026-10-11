@@ -44,11 +44,11 @@ modules="module28,module124"
 SoftPow=10
 out_prefix="./WGCNA/Results/ModuleMembership"
 
-ScriptDir=./WGCNA
+ScriptDir="/lustre/projects/Research_Project-191391/Morteza/github/WGCNA"
 #############################################################################################################################
 
-Rscript "${ScriptDir}"/R/6.WGCNA.ModuleTrait.R "$net_file" "$expr_file" "$pheno_file" "$covars_fact" "$covars_num" "$modules" \
-									   "$analysis_type" "$calc_ME" "$SoftPow" "$corr_plot" "$box_plot" "$save_csv" "$out_prefix" 
+Rscript "${ScriptDir}"/R/7.WGCNA.ModuleMembership.R "$Net_file" "$Expr_file" "$Pheno_file" "$Trait" "$Categorical_trait" "$Covariates_num" \
+												"$Covariates_cat" "$GS_legend_pvalue" "$GS_label_pvalue" "$Adjusted_pvalue_method" "$modules" "$SoftPow" "$out_prefix" 
 
 
 
